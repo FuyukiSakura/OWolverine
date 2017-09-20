@@ -9,7 +9,7 @@ $('#player-request').on('click', function () {
         url: "/StellarView/GetUser",
         data: {
             player: $('#user-name').val(),
-            server: "s119-tw.ogame.gameforge.com"
+            server: $("#server-name").val()
         },
         dataType: 'json',
         success: function (data) {
