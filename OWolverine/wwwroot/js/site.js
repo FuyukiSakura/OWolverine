@@ -7,7 +7,10 @@ $('#player-request').on('click', function () {
     $.ajax({
         type: "POST",
         url: "/StellarView/GetUser",
-        data: { player: $('#user-name').val() },
+        data: {
+            player: $('#user-name').val(),
+            server: "s119-tw.ogame.gameforge.com"
+        },
         dataType: 'json',
         success: function (data) {
             $('#query-result').empty();
