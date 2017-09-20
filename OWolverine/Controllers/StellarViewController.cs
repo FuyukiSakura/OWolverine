@@ -52,6 +52,17 @@ namespace OWolverine.Controllers
             });
         }
 
+        [HttpGet]
+        public JsonResult GetServers()
+        {
+            var httpClient = new HttpClient();
+            var result = httpClient.GetAsync("https://s101-tw.ogame.gameforge.com/api/universes.xml").Result;
+            var stream = result.Content.ReadAsStreamAsync().Result;
+            var itemXml = XElement.Load(stream);
+            var servers = itemXml.Elements("universe");
+            return new JsonResult(false);
+        }
+
         public IActionResult About()
         {
             ViewData["Message"] = "Your application description page.";

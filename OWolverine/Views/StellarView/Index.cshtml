@@ -1,10 +1,14 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Stellar View";
 }
 
 <h1>星圖</h1>
 <div class="row">
     <div class="col-md-12">
+        <label for="server-name">伺服器：</label>
+        <select id="server-name">
+            <option value="s119-tw.ogame.gameforge.com">Sirius</option>
+        </select> 
         <label for="user-name">玩家名稱：</label>
         <input type="text" id="user-name" value="" />
         <button type="button" id="player-request">諮詢</button>

@@ -1,7 +1,21 @@
-﻿// Write your JavaScript code.
-$(document).ready(function () {
+﻿/* $(document).ready(function () {
+    $.ajax({
+        type: "GET",
+        url: "/StellarView/GetServers",
+        dataType: 'json',
+        success: function (data) {
+            $('#query-result').empty();
+            if (data['status'] === 'success') {
+                $.each(data['data'], function (index, value) {
+                    $('#query-result').append(value['coords'] + ' - ' + value['name'] + "<br />");
+                });
+            } else {
+                $('#query-result').html(data['data']);
+            }
+        }
 
-});
+    });
+}); */
 
 $('#player-request').on('click', function () {
     $.ajax({
