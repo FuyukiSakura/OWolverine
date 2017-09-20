@@ -15,6 +15,11 @@ namespace OWolverine.Controllers
             return View();
         }
 
+        public JsonResult GetUser()
+        {
+            return new JsonResult(false);
+        }
+
         public IActionResult About()
         {
             ViewData["Message"] = "Your application description page.";
