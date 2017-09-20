@@ -8,7 +8,7 @@ using OWolverine.Models;
 
 namespace OWolverine.Controllers
 {
-    public class HomeController : Controller
+    public class StellarViewController : Controller
     {
         public IActionResult Index()
         {
