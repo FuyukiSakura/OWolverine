@@ -30,7 +30,7 @@ namespace OWolverine.Controllers
             var stream = result.Content.ReadAsStreamAsync().Result;
 
             var itemXml = XElement.Load(stream);
-            var playerItem = itemXml.Elements("player").SingleOrDefault(x => (string)x.Attribute("name") == player);
+            var playerItem = itemXml.Elements("player").SingleOrDefault(x => String.Equals((string)x.Attribute("name"), player, StringComparison.OrdinalIgnoreCase));
             if(playerItem == null)
             {
                 return new JsonResult(new Response() { status = APIStatus.Fail, message = "玩家不存在" });
