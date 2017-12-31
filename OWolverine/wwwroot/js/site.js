@@ -17,12 +17,13 @@
     });
 }); */
 
-$('#player-request').on('click', function () {
+$('#player-request-form').on('submit', function (e) {
+    e.preventDefault();
     $.ajax({
         type: "POST",
         url: "/StellarView/GetUser",
         data: {
-            player: $('#user-name').val(),
+            playerName: $('#user-name').val(),
             server: $("#server-name").val()
         },
         dataType: 'json',
