@@ -33,19 +33,11 @@ namespace OWolverine.Controllers
                 return new JsonResult(new Response() { status = APIStatus.Fail, message = "玩家不存在" });
             }
 
-            var httpClient = new HttpClient();
-            var result = httpClient.GetAsync("https://" + server + "/api/" + universeAPI).Result;
-            var stream = result.Content.ReadAsStreamAsync().Result;
-            var itemXml = XElement.Load(stream);
-            List<Planet> planets = itemXml.Elements("planet").Where(x => x.Attribute("player").Value == player.Id).Select(planet => new Planet() {
-                Name = planet.Attribute("name").Value,
-                Coords = planet.Attribute("coords").Value
-            }).ToList();
-            
+            OgameAPI.FillPlayerData(player);            
             return new JsonResult(new Response() {
                 status = APIStatus.Success,
                 message = "Returned with data",
-                data = planets
+                data = new[] { player.Data }
             });
         }
 
