@@ -1,23 +1,4 @@
-﻿/* $(document).ready(function () {
-    $.ajax({
-        type: "GET",
-        url: "/StellarView/GetServers",
-        dataType: 'json',
-        success: function (data) {
-            $('#query-result').empty();
-            if (data['status'] === 'success') {
-                $.each(data['data'], function (index, value) {
-                    $('#query-result').append(value['coords'] + ' - ' + value['name'] + "<br />");
-                });
-            } else {
-                $('#query-result').html(data['data']);
-            }
-        }
-
-    });
-}); */
-
-$('#player-request-form').on('submit', function (e) {
+﻿$('#player-request-form').on('submit', function (e) {
     e.preventDefault();
     $.ajax({
         type: "POST",
@@ -27,10 +8,12 @@ $('#player-request-form').on('submit', function (e) {
             server: $("#server-name").val()
         },
         dataType: 'json',
-        success: function (data) {
+        success: function (result) {
             $('#query-result').empty();
-            if (data['status'] === 'success') {
-                $.each(data['data'], function (index, value) {
+            if (result['status'] === 'success') {
+                let data = result['data'][0];
+                $('#query-result').append("艦隊數目：" + data['ships'] + "<br /><br />");
+                $.each(data['planets'], function (index, value) {
                     $('#query-result').append(value['coords'] + ' - ' + value['name'] + "<br />");
                 });
             } else {

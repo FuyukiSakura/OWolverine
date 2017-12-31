@@ -37,7 +37,7 @@ namespace OWolverine.Controllers
             return new JsonResult(new Response() {
                 status = APIStatus.Success,
                 message = "Returned with data",
-                data = player.Data.Planets
+                data = new[] { player.Data }
             });
         }
 

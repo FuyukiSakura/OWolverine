@@ -15,6 +15,7 @@ namespace OgameApiBLL.Models
 
     public class PlayerData
     {
+        public int Ships { get; set; }
         public List<Planet> Planets { get; set; } = new List<Planet>();
     }
 }

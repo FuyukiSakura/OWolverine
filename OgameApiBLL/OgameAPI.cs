@@ -47,6 +47,14 @@ namespace OgameApiBLL
             var stream = result.Content.ReadAsStreamAsync().Result;
 
             var itemXml = XElement.Load(stream);
+            //Load military info
+            player.Data.Ships = (int)itemXml
+                .Element("positions")
+                .Elements("position")
+                .FirstOrDefault(p => p.Attribute("type").Value == "3")
+                .Attribute("ships");
+
+            //Load planets
             List<Planet> planets = itemXml.Element("planets").Elements("planet").Select(planet => new Planet()
             {
                 Id = planet.Attribute("id").Value,
