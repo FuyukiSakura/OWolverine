@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OWolverine", "OWolverine\OWolverine.csproj", "{32A2486F-96D8-4223-87A7-933F9763A595}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OWolverine", "OWolverine\OWolverine.csproj", "{32A2486F-96D8-4223-87A7-933F9763A595}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OgameApiBLL", "OgameApiBLL\OgameApiBLL.csproj", "{BAF1C799-E316-49D2-8BB1-8E63767FBAAC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{32A2486F-96D8-4223-87A7-933F9763A595}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32A2486F-96D8-4223-87A7-933F9763A595}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{32A2486F-96D8-4223-87A7-933F9763A595}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAF1C799-E316-49D2-8BB1-8E63767FBAAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAF1C799-E316-49D2-8BB1-8E63767FBAAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAF1C799-E316-49D2-8BB1-8E63767FBAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAF1C799-E316-49D2-8BB1-8E63767FBAAC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
