@@ -9,13 +9,15 @@ using System.Net.Http;
 using System.Xml.Linq;
 using OWolverine.Models.Utility;
 using OWolverine.Models.StellarView;
+using OgameApiBLL;
 
 namespace OWolverine.Controllers
 {
     public class StellarViewController : Controller
     {
-        private string playerAPI = "players.xml";
-        private string universeAPI = "universe.xml";
+        private const string playerAPI = "players.xml";
+        private const string universeAPI = "universe.xml";
+        private const string playerDataApi = "playerData.xml";
 
         public IActionResult Index()
         {
@@ -23,26 +25,21 @@ namespace OWolverine.Controllers
         }
 
         [HttpPost]
-        public JsonResult GetUser(string server,string player)
+        public JsonResult GetUser(string server,string playerName)
         {
-            var httpClient = new HttpClient();
-            var result = httpClient.GetAsync("https://"+server+"/api/"+playerAPI).Result;
-            var stream = result.Content.ReadAsStreamAsync().Result;
-
-            var itemXml = XElement.Load(stream);
-            var playerItem = itemXml.Elements("player").SingleOrDefault(x => String.Equals((string)x.Attribute("name"), player, StringComparison.OrdinalIgnoreCase));
-            if(playerItem == null)
+            var player = OgameAPI.FindPlayer(server, playerName);
+            if(player == null)
             {
                 return new JsonResult(new Response() { status = APIStatus.Fail, message = "玩家不存在" });
             }
 
-            var playerId = (int) playerItem.Attribute("id");
-            result = httpClient.GetAsync("https://" + server + "/api/" + universeAPI).Result;
-            stream = result.Content.ReadAsStreamAsync().Result;
-            itemXml = XElement.Load(stream);
-            List<Planet> planets = itemXml.Elements("planet").Where(x => (int)x.Attribute("player") == playerId).Select(planet => new Planet() {
-                Name = (string)planet.Attribute("name"),
-                Coords = (string)planet.Attribute("coords")
+            var httpClient = new HttpClient();
+            var result = httpClient.GetAsync("https://" + server + "/api/" + universeAPI).Result;
+            var stream = result.Content.ReadAsStreamAsync().Result;
+            var itemXml = XElement.Load(stream);
+            List<Planet> planets = itemXml.Elements("planet").Where(x => x.Attribute("player").Value == player.Id).Select(planet => new Planet() {
+                Name = planet.Attribute("name").Value,
+                Coords = planet.Attribute("coords").Value
             }).ToList();
             
             return new JsonResult(new Response() {
