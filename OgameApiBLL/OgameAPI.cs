@@ -32,10 +32,10 @@ namespace OgameApiBLL
             {
                 Id = playerElement.Attribute("id").Value,
                 Name = playerElement.Attribute("name").Value,
-                Alliance = new Alliance
+                /* Alliance = new Alliance
                 {
                     Id = playerElement.Attribute("alliance").Value
-                },
+                }, */
                 Server = server
             };
         }
