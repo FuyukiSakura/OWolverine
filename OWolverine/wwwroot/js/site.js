@@ -17,9 +17,11 @@
                     $('#query-result').append(value['coords'] + ' - ' + value['name'] + "<br />");
                 });
             } else {
-                $('#query-result').html(data['data']);
+                $('#query-result').html(result['message']);
             }
+        },
+        error: function () {
+            $('#query-result').html(data['內部錯誤']);
         }
-
     });
 });
