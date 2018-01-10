@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using OWolverine.Services.Ogame;
 
 namespace OWolverine.Data
 {
@@ -17,6 +18,14 @@ namespace OWolverine.Data
             {
                 return; // DB has been seeded
             }
+
+            //Load Servers from Ogame
+            var result = OgameApi.GetAllUniverses();
+            foreach(var universe in result)
+            {
+                context.Universes.Add(universe);
+            }
+            context.SaveChanges();
         }
     }
 }

@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CSharpUtilities\CSharpUtilities.csproj" />
     <ProjectReference Include="..\OgameApiBLL\OgameApiBLL.csproj" />
   </ItemGroup>
 
