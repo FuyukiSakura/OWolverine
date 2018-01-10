@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
 
@@ -29,8 +28,7 @@ namespace OWolverine.Data.Migrations
                 schema: "og",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     DebrisFactor = table.Column<float>(type: "real", nullable: false),
                     DefToDebris = table.Column<float>(type: "real", nullable: false),
                     DeuteriumSaveFactor = table.Column<float>(type: "real", nullable: false),
@@ -56,8 +54,7 @@ namespace OWolverine.Data.Migrations
                 schema: "og",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ServerAlliance = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ServerId = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -81,12 +78,12 @@ namespace OWolverine.Data.Migrations
                 schema: "og",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     Coords = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     OwnerId = table.Column<int>(type: "int", nullable: true),
                     PlayerId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ServerId = table.Column<int>(type: "int", nullable: false),
                     UniverseId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>

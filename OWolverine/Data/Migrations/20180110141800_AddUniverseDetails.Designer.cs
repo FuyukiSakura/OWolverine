@@ -11,8 +11,8 @@ using System;
 namespace OWolverine.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20180110132520_RemoveOgameIdsFromServerGenerated")]
-    partial class RemoveOgameIdsFromServerGenerated
+    [Migration("20180110141800_AddUniverseDetails")]
+    partial class AddUniverseDetails
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
