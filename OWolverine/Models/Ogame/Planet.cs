@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -11,7 +12,9 @@ namespace OWolverine.Models.Ogame
     public class Planet
     {
         [XmlAttribute("id")]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
+        public int ServerId { get; set; }
         [XmlAttribute("name")]
         public string Name { get; set; }
 

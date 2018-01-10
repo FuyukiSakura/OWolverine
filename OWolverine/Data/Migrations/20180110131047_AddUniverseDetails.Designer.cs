@@ -11,9 +11,10 @@ using System;
 namespace OWolverine.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180110131047_AddUniverseDetails")]
+    partial class AddUniverseDetails
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -181,7 +182,8 @@ namespace OWolverine.Data.Migrations
 
             modelBuilder.Entity("OWolverine.Models.Ogame.Planet", b =>
                 {
-                    b.Property<int>("Id");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("Coords");
 
@@ -190,8 +192,6 @@ namespace OWolverine.Data.Migrations
                     b.Property<int?>("OwnerId");
 
                     b.Property<string>("PlayerId");
-
-                    b.Property<int>("ServerId");
 
                     b.Property<int?>("UniverseId");
 
@@ -206,7 +206,8 @@ namespace OWolverine.Data.Migrations
 
             modelBuilder.Entity("OWolverine.Models.Ogame.Player", b =>
                 {
-                    b.Property<int>("Id");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("Name");
 
@@ -227,7 +228,8 @@ namespace OWolverine.Data.Migrations
 
             modelBuilder.Entity("OWolverine.Models.Ogame.Universe", b =>
                 {
-                    b.Property<int>("Id");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<float>("DebrisFactor");
 

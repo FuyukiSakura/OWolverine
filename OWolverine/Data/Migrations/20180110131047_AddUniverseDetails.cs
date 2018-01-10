@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace OWolverine.Data.Migrations
 {
-    public partial class AddUniverseDtails : Migration
+    public partial class AddUniverseDetails : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -29,7 +29,8 @@ namespace OWolverine.Data.Migrations
                 schema: "og",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     DebrisFactor = table.Column<float>(type: "real", nullable: false),
                     DefToDebris = table.Column<float>(type: "real", nullable: false),
                     DeuteriumSaveFactor = table.Column<float>(type: "real", nullable: false),
@@ -61,7 +62,7 @@ namespace OWolverine.Data.Migrations
                     ServerAlliance = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ServerId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UniverseId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    UniverseId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -86,7 +87,7 @@ namespace OWolverine.Data.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     OwnerId = table.Column<int>(type: "int", nullable: true),
                     PlayerId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UniverseId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    UniverseId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
