@@ -18,11 +18,15 @@ namespace OWolverine.Data
 
         //Datasets
         public DbSet<Universe> Universes { get; set; }
+        public DbSet<Planet> Planets { get; set; }
+        public DbSet<Player> Players { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.Entity<Universe>().ToTable("Universe");
+            builder.Entity<Universe>().ToTable("Universe", "og");
+            builder.Entity<Planet>().ToTable("Planet", "og");
+            builder.Entity<Player>().ToTable("Player", "og");
         }
     }
 }

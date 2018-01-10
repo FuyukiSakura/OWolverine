@@ -11,6 +11,8 @@ namespace OgameApiBLL
     {
         private const string playerAPI = "players.xml";
         private const string universeAPI = "universe.xml";
+        private const string universes = "universes.xml";
+        private const string serverDataAPI = "serverData.xml";
         private const string playerDataApi = "playerData.xml";
 
         /// <summary>
