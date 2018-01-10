@@ -21,17 +21,29 @@ namespace OWolverine.Models.Ogame
         public string Domain { get; set; }
 
         //Settings
+        [XmlElement("speed")]
         public float Speed { get; set; }
+        [XmlElement("speedFleet")]
         public float FleetSpeed { get; set; }
+        [XmlElement("galaxies")]
         public int Galaxies { get; set; }
+        [XmlElement("systems")]
         public int Systems { get; set; }
+        [XmlElement("rapidFire")]
         public bool RapidFire { get; set; }
+        [XmlElement("debrisFactor")]
         public float DebrisFactor { get; set; }
+        [XmlElement("debrisFactorDef")]
         public float DefToDebris { get; set; }
+        [XmlElement("topScore")]
         public int TopScore { get; set; }
+        [XmlElement("donutGalaxy")]
         public bool DonutGalaxy { get; set; }
+        [XmlElement("donutSystem")]
         public bool DonutSystem { get; set; }
+        [XmlElement("wfEnabled")]
         public bool WreckField { get; set; }
+        [XmlElement("globalDeuteriumSaveFactor")]
         public float DeuteriumSaveFactor { get; set; }
     }
 }
