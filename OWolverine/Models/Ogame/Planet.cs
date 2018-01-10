@@ -14,6 +14,8 @@ namespace OWolverine.Models.Ogame
         public int Id { get; set; }
         [XmlAttribute("name")]
         public string Name { get; set; }
+
+        private Coordinate _coords { get; set; } = new Coordinate();
         [XmlAttribute("coords")]
         public string Coords {
             get {
@@ -26,7 +28,18 @@ namespace OWolverine.Models.Ogame
                 _coords.Location = Convert.ToInt32(arr[2]);
             }
         }
-        private Coordinate _coords { get; set; } = new Coordinate();
+
+        private string _playerId { get; set; }
+        [XmlAttribute("player")]
+        public string PlayerId {
+            get {
+                return _playerId;
+            }
+            set {
+                Owner.ServerId = _playerId = value;
+            }
+        }
+        public Player Owner { get; set; } = new Player();
     }
 
     public class Coordinate
