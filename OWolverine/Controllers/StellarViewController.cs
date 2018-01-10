@@ -8,7 +8,7 @@ using OWolverine.Models;
 using System.Net.Http;
 using System.Xml.Linq;
 using OWolverine.Models.Utility;
-using OWolverine.Models.StellarView;
+using OWolverine.Models.Ogame;
 using OgameApiBLL;
 
 namespace OWolverine.Controllers

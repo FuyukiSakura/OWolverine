@@ -22,4 +22,8 @@
     <ProjectReference Include="..\OgameApiBLL\OgameApiBLL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\StellarView\" />
+  </ItemGroup>
+
 </Project>
