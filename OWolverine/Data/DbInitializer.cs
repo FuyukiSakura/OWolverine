@@ -20,11 +20,7 @@ namespace OWolverine.Data
             }
 
             //Load Servers from Ogame
-            var result = OgameApi.GetAllUniverses();
-            foreach(var universe in result)
-            {
-                context.Universes.Add(universe);
-            }
+            context.Universes.AddRange(OgameApi.GetAllUniverses());
             context.SaveChanges();
         }
     }
