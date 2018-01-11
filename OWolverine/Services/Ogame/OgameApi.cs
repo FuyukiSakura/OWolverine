@@ -27,13 +27,11 @@ namespace OWolverine.Services.Ogame
                 .Elements("universe").Select(x => Convert.ToInt32(x.Attribute("id").Value)).ToArray();
 
             //Load server details
-            var serializer = new XmlSerializer(typeof(UniverseXml));
+            var serializer = new XmlSerializer(typeof(Universe));
             var universeList = new List<Universe>();
             foreach (var id in servers)
             {
-                var universe = ObjectHelper.CloneAndUpcast<Universe>(
-                   (UniverseXml)serializer.Deserialize(RequestAPI(id.ToString(), serverDataAPI))
-                );
+                var universe = (Universe)serializer.Deserialize(RequestAPI(id.ToString(), serverDataAPI));
                 universe.LastUpdate = DateTime.Now;
                 universeList.Add(universe);
             }
