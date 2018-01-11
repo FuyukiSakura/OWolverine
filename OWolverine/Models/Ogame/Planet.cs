@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,8 +14,10 @@ namespace OWolverine.Models.Ogame
     {
         [XmlAttribute("id")]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [Key, Column(Order = 0)]
         public int Id { get; set; }
-        public int ServerId { get; set; }
+        [Key, Column(Order = 1)]
+        public int Server { get; set; }
         [XmlAttribute("name")]
         public string Name { get; set; }
 
@@ -32,17 +35,21 @@ namespace OWolverine.Models.Ogame
             }
         }
 
-        private string _playerId { get; set; }
+        private int _playerId { get; set; }
         [XmlAttribute("player")]
-        public string PlayerId {
+        public int PlayerId {
             get {
                 return _playerId;
             }
             set {
-                Owner.ServerId = _playerId = value;
+                Owner.Id = _playerId = value;
             }
         }
+
+        [XmlIgnore]
         public Player Owner { get; set; } = new Player();
+        [Timestamp]
+        public DateTime LastUpdate { get; set; }
     }
 
     public class Coordinate
