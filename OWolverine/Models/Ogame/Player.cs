@@ -8,6 +8,13 @@ using System.Xml.Serialization;
 
 namespace OWolverine.Models.Ogame
 {
+    [XmlRoot("players")]
+    public class PlayerList
+    {
+        [XmlElement("player")]
+        public List<Player> Players { get; set; }
+    }
+
     public class Player
     {
         [XmlAttribute("id")]

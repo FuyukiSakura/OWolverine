@@ -30,6 +30,8 @@ namespace OWolverine.Models.Ogame
         public int Galaxies { get; set; }
         [XmlElement("systems")]
         public int Systems { get; set; }
+        [XmlElement("acs")]
+        public bool Acs { get; set; }
         [XmlElement("rapidFire")]
         public bool RapidFire { get; set; }
         [XmlElement("debrisFactor")]

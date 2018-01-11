@@ -19,8 +19,12 @@ namespace OWolverine.Services.Ogame
         private const string serverDataAPI = "serverData.xml";
         private const string playerDataApi = "playerData.xml";
 
-        private const string mainServer = "101";
+        private const int mainServer = 101;
 
+        /// <summary>
+        /// Get all universe in the server of the origin
+        /// </summary>
+        /// <returns></returns>
         public static Universe[] GetAllUniverses()
         {
             var servers = XElement.Load(RequestAPI(mainServer, universes))
@@ -31,11 +35,24 @@ namespace OWolverine.Services.Ogame
             var universeList = new List<Universe>();
             foreach (var id in servers)
             {
-                var universe = (Universe)serializer.Deserialize(RequestAPI(id.ToString(), serverDataAPI));
+                var universe = (Universe)serializer.Deserialize(RequestAPI(id, serverDataAPI));
                 universe.LastUpdate = DateTime.Now;
                 universeList.Add(universe);
             }
             return universeList.ToArray();
+        }
+
+        /// <summary>
+        /// Get all players in the given server
+        /// </summary>
+        /// <param name="serverId"></param>
+        /// <returns></returns>
+        public static Player[] GetAllPlayers(int serverId)
+        {
+            var serializer = new XmlSerializer(typeof(PlayerList));
+            var playerList = ((PlayerList)serializer.Deserialize(RequestAPI(serverId, playerAPI))).Players;
+            playerList.ForEach(p => p.Server = serverId); //Assign Server ID
+            return playerList.ToArray();
         }
 
         /// <summary>
@@ -45,10 +62,10 @@ namespace OWolverine.Services.Ogame
         /// <param name="api">The api to call</param>
         /// <param name="param">Extra param</param>
         /// <returns></returns>
-        private static Stream RequestAPI(string serverId, string api, string param = "")
+        private static Stream RequestAPI(int serverId, string api, string param = "")
         {
             var httpClient = new HttpClient();
-            var result = httpClient.GetAsync($"https://s{serverId}-tw.ogame.gameforge.com/api/{api}{param}").Result;
+            var result = httpClient.GetAsync($"https://s{serverId.ToString()}-tw.ogame.gameforge.com/api/{api}{param}").Result;
             return result.Content.ReadAsStreamAsync().Result;
         }
     }

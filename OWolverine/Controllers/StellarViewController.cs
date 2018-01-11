@@ -13,6 +13,7 @@ using OgameApiBLL;
 using Microsoft.AspNetCore.Identity;
 using OWolverine.Data;
 using Microsoft.EntityFrameworkCore;
+using OWolverine.Services.Ogame;
 
 namespace OWolverine.Controllers
 {
@@ -47,6 +48,19 @@ namespace OWolverine.Controllers
             return View(await _context.Universes.ToListAsync());
         }
 
+        public async Task<IActionResult> RefreshUniverse(int id)
+        {
+            var universe = _context.Universes.FirstOrDefault(u => u.Id == id);
+            if (universe == null)
+            {
+                return NotFound();
+            }
+            var result = OgameApi.GetAllPlayers(id);
+            _context.Players.AddRange(result);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
         [HttpPost]
         public JsonResult GetUser(string server,string playerName)
         {
@@ -73,20 +87,6 @@ namespace OWolverine.Controllers
             var itemXml = XElement.Load(stream);
             var servers = itemXml.Elements("universe");
             return new JsonResult(false);
-        }
-
-        public IActionResult About()
-        {
-            ViewData["Message"] = "Your application description page.";
-
-            return View();
-        }
-
-        public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
-
-            return View();
         }
 
         public IActionResult Error()
