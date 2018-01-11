@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -15,7 +17,10 @@ namespace OWolverine.Models.Ogame
         [XmlAttribute("id")]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
-        public int Server { get; set; }
+        public int ServerId { get; set; }
+        [ForeignKey("ServerId")]
+        public Universe Server { get; set; }
+
         [XmlAttribute("name")]
         public string Name { get; set; }
 
@@ -33,18 +38,10 @@ namespace OWolverine.Models.Ogame
             }
         }
 
-        private int _playerId { get; set; }
         [XmlAttribute("player")]
-        public int PlayerId {
-            get {
-                return _playerId;
-            }
-            set {
-                Owner.Id = _playerId = value;
-            }
-        }
-
+        public int OwnerId { get; set; }
         [XmlIgnore]
+        [ForeignKey("OwnerId")]
         public Player Owner { get; set; } = new Player();
         [Timestamp]
         public DateTime LastUpdate { get; set; }
@@ -55,5 +52,16 @@ namespace OWolverine.Models.Ogame
         public int Galaxy { get; set; }
         public int System { get; set; }
         public int Location { get; set; }
+    }
+
+    public class PlanetConfiguration : IEntityTypeConfiguration<Planet>
+    {
+        public void Configure(EntityTypeBuilder<Planet> builder)
+        {
+            builder.ToTable("Planet", "og")
+                .HasKey(p => new { p.Id, p.ServerId });
+            builder.HasOne(p => p.Server)
+                .WithOne();
+        }
     }
 }

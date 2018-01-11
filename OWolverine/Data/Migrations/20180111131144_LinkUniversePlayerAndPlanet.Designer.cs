@@ -11,9 +11,10 @@ using System;
 namespace OWolverine.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180111131144_LinkUniversePlayerAndPlanet")]
+    partial class LinkUniversePlayerAndPlanet
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

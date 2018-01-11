@@ -56,7 +56,10 @@ namespace OWolverine.Controllers
                 return NotFound();
             }
             var result = OgameApi.GetAllPlayers(id);
-            _context.Players.AddRange(result);
+            foreach(var player in result)
+            {
+                _context.Players.Add(player);
+            }
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

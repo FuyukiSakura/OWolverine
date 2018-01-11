@@ -24,11 +24,9 @@ namespace OWolverine.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.Entity<Universe>().ToTable("Universe", "og");
-            builder.Entity<Planet>().ToTable("Planet", "og")
-                .HasKey(p => new { p.Id, p.Server });
-            builder.Entity<Player>().ToTable("Player", "og")
-                .HasKey(p => new { p.Id, p.Server });
+            builder.ApplyConfiguration(new UniverseConfiguration());
+            builder.ApplyConfiguration(new PlanetConfiguration());
+            builder.ApplyConfiguration(new PlayerConfiguration());
         }
     }
 }

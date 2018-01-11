@@ -51,7 +51,7 @@ namespace OWolverine.Services.Ogame
         {
             var serializer = new XmlSerializer(typeof(PlayerList));
             var playerList = ((PlayerList)serializer.Deserialize(RequestAPI(serverId, playerAPI))).Players;
-            playerList.ForEach(p => p.Server = serverId); //Assign Server ID
+            playerList.ForEach(p => p.ServerId = serverId); //Assign Server ID
             return playerList.ToArray();
         }
 

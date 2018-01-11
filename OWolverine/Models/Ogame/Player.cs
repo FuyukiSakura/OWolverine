@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -17,10 +19,13 @@ namespace OWolverine.Models.Ogame
 
     public class Player
     {
-        [XmlAttribute("id")]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
-        public int Server { get; set; }
+        [XmlAttribute("id")]
+        public int PlayerId { get; set; }
+        public int ServerId { get; set; }
+        [ForeignKey("ServerId")]
+        public Universe Server { get; set; }
+
         [XmlAttribute("name")]
         public string Name { get; set; }
         [XmlAttribute("status")]
@@ -45,7 +50,8 @@ namespace OWolverine.Models.Ogame
                 if (value.Contains("I")) IsLeft = true;
             }
         }
-        public string ServerAlliance { get; set; }
+        [XmlAttribute("alliance")]
+        public int AllianceId { get; set; }
 
         //Status Property
         public bool IsAdmin { get; set; }
@@ -53,14 +59,19 @@ namespace OWolverine.Models.Ogame
         public bool IsVocation { get; set; }
         public bool IsInactive { get; set; }
         public bool IsLeft { get; set; }
+
+        [Timestamp]
+        public DateTime LastUpdate { get; set; }
     }
 
-    public enum PlayerStatus
+    public class PlayerConfiguration : IEntityTypeConfiguration<Player>
     {
-        Admin,
-        Flee,
-        Vocation,
-        Inactive,
-        Left
+        public void Configure(EntityTypeBuilder<Player> builder)
+        {
+            builder.ToTable("Player", "og")
+                .HasAlternateKey(e => new { e.Id, e.ServerId });
+            builder.HasOne(p => p.Server)
+                .WithOne();
+        }
     }
 }

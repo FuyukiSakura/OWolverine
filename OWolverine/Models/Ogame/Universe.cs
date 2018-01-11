@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -56,5 +58,13 @@ namespace OWolverine.Models.Ogame
         public ICollection<Planet> Planets { get; set; } = new List<Planet>();
         [XmlIgnore]
         public ICollection<Player> Players { get; set; } = new List<Player>();
+    }
+
+    public class UniverseConfiguration : IEntityTypeConfiguration<Universe>
+    {
+        public void Configure(EntityTypeBuilder<Universe> builder)
+        {
+            builder.ToTable("Universe", "og");
+        }
     }
 }
