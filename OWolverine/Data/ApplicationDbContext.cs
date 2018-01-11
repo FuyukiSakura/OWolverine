@@ -25,8 +25,10 @@ namespace OWolverine.Data
         {
             base.OnModelCreating(builder);
             builder.Entity<Universe>().ToTable("Universe", "og");
-            builder.Entity<Planet>().ToTable("Planet", "og");
-            builder.Entity<Player>().ToTable("Player", "og");
+            builder.Entity<Planet>().ToTable("Planet", "og")
+                .HasKey(p => new { p.Id, p.Server });
+            builder.Entity<Player>().ToTable("Player", "og")
+                .HasKey(p => new { p.Id, p.Server });
         }
     }
 }

@@ -14,9 +14,7 @@ namespace OWolverine.Models.Ogame
     {
         [XmlAttribute("id")]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        [Key, Column(Order = 0)]
         public int Id { get; set; }
-        [Key, Column(Order = 1)]
         public int Server { get; set; }
         [XmlAttribute("name")]
         public string Name { get; set; }
