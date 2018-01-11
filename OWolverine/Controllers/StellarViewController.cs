@@ -10,18 +10,41 @@ using System.Xml.Linq;
 using OWolverine.Models.Utility;
 using OWolverine.Models.Ogame;
 using OgameApiBLL;
+using Microsoft.AspNetCore.Identity;
+using OWolverine.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace OWolverine.Controllers
 {
     public class StellarViewController : Controller
     {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ApplicationDbContext _context;
+
         private const string playerAPI = "players.xml";
         private const string universeAPI = "universe.xml";
         private const string playerDataApi = "playerData.xml";
 
-        public IActionResult Index()
+        /// <summary>
+        /// Dependency Injection
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="userManager"></param>
+        /// <param name="signInManager"></param>
+        public StellarViewController(
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager)
         {
-            return View();
+            _context = context;
+            _userManager = userManager;
+            _signInManager = signInManager;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            return View(await _context.Universes.ToListAsync());
         }
 
         [HttpPost]

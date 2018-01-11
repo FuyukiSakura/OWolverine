@@ -1,4 +1,5 @@
-﻿@{
+﻿@model IEnumerable<OWolverine.Models.Ogame.Universe>
+@{
     ViewData["Title"] = "Stellar View";
 }
 
@@ -53,3 +54,54 @@
         <div id="query-result"></div>
     </div>
 </div>
+
+<!-- Server status -->
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Speed)
+            </th>
+            <th>
+                Active / Players
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LastUpdate)
+            </th>
+            <th>
+
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Speed) / @Html.DisplayFor(modelItem => item.FleetSpeed)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Players.Count)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastUpdate)
+            </td>
+            <td>
+                <a asp-action="Refresh" asp-route-id="@item.Id">Refresh</a>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>

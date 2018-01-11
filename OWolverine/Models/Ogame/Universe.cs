@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ namespace OWolverine.Models.Ogame
         //Info
         [XmlElement("number")]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [Display(Name = "Server ID")]
         public int Id { get; set; }
         [XmlElement("name")]
         public string Name { get; set; }
