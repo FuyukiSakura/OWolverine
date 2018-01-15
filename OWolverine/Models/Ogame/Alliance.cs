@@ -30,7 +30,6 @@ namespace OWolverine.Models.Ogame
         [XmlAttribute("founder")]
         public int FounderId { get; set; }
         [XmlIgnore]
-        [ForeignKey("FounderId")]
         public Player Founder { get; set; }
         [XmlElement("player")]
         public List<Player> Members { get; set; }
@@ -48,6 +47,9 @@ namespace OWolverine.Models.Ogame
         {
             builder.ToTable("Alliance", "og");
             builder.HasKey(e => new { e.Id, e.ServerId });
+            builder.HasOne(e => e.Founder)
+                .WithOne()
+                .HasForeignKey<Alliance>(e => new { e.FounderId, e.ServerId });
         }
     }
 }

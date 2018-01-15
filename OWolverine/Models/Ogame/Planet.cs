@@ -37,7 +37,6 @@ namespace OWolverine.Models.Ogame
         [XmlAttribute("player")]
         public int OwnerId { get; set; }
         [XmlIgnore]
-        [ForeignKey("OwnerId")]
         public Player Owner { get; set; } = new Player();
 
         public int ServerId { get; set; }

@@ -27,7 +27,7 @@ namespace OWolverine.Data
             base.OnModelCreating(builder);
             builder.Entity<Universe>().ToTable("Universe", "og");
             builder.ApplyConfiguration(new PlayerConfiguration());
-            builder.Entity<Alliance>().ToTable("Alliance", "og");
+            builder.ApplyConfiguration(new AllianceConfiguration());
             builder.ApplyConfiguration(new PlanetConfiguration());
         }
     }

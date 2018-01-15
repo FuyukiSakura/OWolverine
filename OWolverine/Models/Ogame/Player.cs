@@ -19,10 +19,9 @@ namespace OWolverine.Models.Ogame
 
     public class Player
     {
-        public int Id { get; set; }
         [XmlAttribute("id")]
-        public int PlayerId { get; set; }
-
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public int Id { get; set; }
         [XmlAttribute("name")]
         public string Name { get; set; }
         [XmlAttribute("status")]
@@ -74,7 +73,6 @@ namespace OWolverine.Models.Ogame
         public bool IsInactive { get; set; }
         public bool IsLeft { get; set; }
 
-        [InverseProperty("Owner")]
         public List<Planet> Planets { get; set; } = new List<Planet>();
         public int ServerId { get;set; }
         public Universe Server { get; set; }
@@ -86,12 +84,16 @@ namespace OWolverine.Models.Ogame
         public void Configure(EntityTypeBuilder<Player> builder)
         {
             builder.ToTable("Player", "og");
+            builder.HasKey(e => new { e.Id, e.ServerId });
             builder.HasOne(e => e.Server)
                 .WithMany(u => u.Players)
                 .HasForeignKey(e => e.ServerId);
             builder.HasOne(e => e.Alliance)
                 .WithMany(a => a.Members)
                 .HasForeignKey(e => new { e.AllianceId, e.ServerId });
+            builder.HasMany(e => e.Planets)
+                .WithOne()
+                .HasForeignKey(p => new { p.Id, p.ServerId });
         }
     }
 }
