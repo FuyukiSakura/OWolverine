@@ -4,10 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml.Serialization;
-using CSharpUtilities;
 
 namespace OWolverine.Services.Ogame
 {
@@ -48,18 +46,32 @@ namespace OWolverine.Services.Ogame
         /// </summary>
         /// <param name="serverId"></param>
         /// <returns></returns>
-        public static Player[] GetAllPlayers(int serverId)
+        public static List<Player> GetAllPlayers(int serverId)
         {
             var serializer = new XmlSerializer(typeof(PlayerList));
-            var players = ((PlayerList)serializer.Deserialize(RequestAPI(serverId, playerAPI))).Players;
-            players.ForEach(p => p.AllianceId = null); //Unset alliance
-            return players.ToArray();
+            var playerList = ((PlayerList)serializer.Deserialize(RequestAPI(serverId, playerAPI))).Players;
+            playerList.ForEach(p => {
+                p.AllianceId = null; //Unset alliance
+                p.ServerId = serverId; //Attach server
+            });
+            return playerList;
         }
 
-        public static Alliance[] GetAllAlliance(int serverId)
+        /// <summary>
+        /// Get all alliances in server
+        /// </summary>
+        /// <param name="serverId"></param>
+        /// <returns></returns>
+        public static List<Alliance> GetAllAlliance(int serverId)
         {
             var serializer = new XmlSerializer(typeof(AllianceList));
-            return ((AllianceList)serializer.Deserialize(RequestAPI(serverId, allianceAPI))).Alliances.ToArray();
+            var allianceList = ((AllianceList)serializer.Deserialize(RequestAPI(serverId, allianceAPI))).Alliances;
+            allianceList.ForEach(a =>
+            {
+                a.ServerId = serverId;
+                a.Members.ForEach(m => m.ServerId = serverId);
+            }); //Assign server id
+            return allianceList;
         }
 
         /// <summary>

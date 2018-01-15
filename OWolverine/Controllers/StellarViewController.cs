@@ -56,9 +56,19 @@ namespace OWolverine.Controllers
             if (universe == null)
             {
                 return NotFound();
-            }           
-            universe.Players.AddRange(OgameApi.GetAllPlayers(id));
-            universe.Alliance.AddRange(OgameApi.GetAllAlliance(id));
+            }
+
+            //Load players into DB
+            _context.Players.UpdateRange(OgameApi.GetAllPlayers(id));
+            await _context.SaveChangesAsync();
+
+            //Load Alliance into DB
+            var alliance = OgameApi.GetAllAlliance(id);
+            alliance.ForEach(a => {
+                a.Founder = _context.Players.FirstOrDefault(p => p.Id == a.FounderId && p.ServerId == a.ServerId);
+                a.Members.ForEach(m => m = _context.Players.FirstOrDefault(p => m.Id == p.Id && m.ServerId == p.ServerId));
+            });
+            _context.Alliances.AddRange(alliance);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

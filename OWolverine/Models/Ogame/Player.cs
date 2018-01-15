@@ -92,7 +92,7 @@ namespace OWolverine.Models.Ogame
                 .WithMany(a => a.Members)
                 .HasForeignKey(e => new { e.AllianceId, e.ServerId });
             builder.HasMany(e => e.Planets)
-                .WithOne()
+                .WithOne(p => p.Owner)
                 .HasForeignKey(p => new { p.Id, p.ServerId });
         }
     }
