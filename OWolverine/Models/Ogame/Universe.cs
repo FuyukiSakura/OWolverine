@@ -55,16 +55,12 @@ namespace OWolverine.Models.Ogame
 
         //Data
         [XmlIgnore]
-        public ICollection<Planet> Planets { get; set; } = new List<Planet>();
+        public List<Player> Players { get; set; } = new List<Player>();
         [XmlIgnore]
-        public ICollection<Player> Players { get; set; } = new List<Player>();
-    }
-
-    public class UniverseConfiguration : IEntityTypeConfiguration<Universe>
-    {
-        public void Configure(EntityTypeBuilder<Universe> builder)
-        {
-            builder.ToTable("Universe", "og");
-        }
+        [InverseProperty("Server")]
+        public List<Alliance> Alliance { get; set; } = new List<Alliance>();
+        [XmlIgnore]
+        [InverseProperty("Server")]
+        public List<Planet> Planets { get; set; } = new List<Planet>();
     }
 }

@@ -22,9 +22,6 @@ namespace OWolverine.Models.Ogame
         public int Id { get; set; }
         [XmlAttribute("id")]
         public int PlayerId { get; set; }
-        public int ServerId { get; set; }
-        [ForeignKey("ServerId")]
-        public Universe Server { get; set; }
 
         [XmlAttribute("name")]
         public string Name { get; set; }
@@ -43,15 +40,33 @@ namespace OWolverine.Models.Ogame
             }
             set
             {
-                if (value.Contains("a")) IsAdmin = true;
-                if (value.Contains("u")) IsVocation = true;
-                if (value.Contains("o")) IsFlee = true;
-                if (value.Contains("i")) IsInactive = true;
-                if (value.Contains("I")) IsLeft = true;
+                IsAdmin = value.Contains("a");
+                IsVocation = value.Contains("u");
+                IsFlee = value.Contains("o");
+                IsInactive = value.Contains("i");
+                IsLeft = value.Contains("I");
             }
         }
+
         [XmlAttribute("alliance")]
-        public int AllianceId { get; set; }
+        [NotMapped]
+        private int _AllianceId { get; set; }
+        public int? AllianceId
+        {
+            get
+            {
+                if (_AllianceId == -1) {
+                    return null;
+                }
+                else
+                {
+                    return _AllianceId;
+                }
+            }
+            set => _AllianceId = value == null ? -1 : (int)value;
+        }
+        [ForeignKey("AllianceId")]
+        public Alliance Alliance { get; set; }
 
         //Status Property
         public bool IsAdmin { get; set; }
@@ -60,7 +75,10 @@ namespace OWolverine.Models.Ogame
         public bool IsInactive { get; set; }
         public bool IsLeft { get; set; }
 
-        [Timestamp]
+        [InverseProperty("Owner")]
+        public List<Planet> Planets { get; set; } = new List<Planet>();
+        public int ServerId { get;set; }
+        public Universe Server { get; set; }
         public DateTime LastUpdate { get; set; }
     }
 
@@ -68,10 +86,10 @@ namespace OWolverine.Models.Ogame
     {
         public void Configure(EntityTypeBuilder<Player> builder)
         {
-            builder.ToTable("Player", "og")
-                .HasAlternateKey(e => new { e.Id, e.ServerId });
-            builder.HasOne(p => p.Server)
-                .WithOne();
+            builder.ToTable("Player", "og");
+            builder.HasOne(e => e.Server)
+                .WithMany(u => u.Players)
+                .HasForeignKey(e => e.ServerId);
         }
     }
 }

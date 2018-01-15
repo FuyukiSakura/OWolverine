@@ -17,10 +17,6 @@ namespace OWolverine.Models.Ogame
         [XmlAttribute("id")]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
-        public int ServerId { get; set; }
-        [ForeignKey("ServerId")]
-        public Universe Server { get; set; }
-
         [XmlAttribute("name")]
         public string Name { get; set; }
 
@@ -43,8 +39,11 @@ namespace OWolverine.Models.Ogame
         [XmlIgnore]
         [ForeignKey("OwnerId")]
         public Player Owner { get; set; } = new Player();
-        [Timestamp]
-        public DateTime LastUpdate { get; set; }
+
+        public int ServerId { get; set; }
+        [ForeignKey("ServerId")]
+        public Universe Server { get; set; }
+        public DateTime LastUpdated { get; set; }
     }
 
     public class Coordinate
@@ -59,9 +58,7 @@ namespace OWolverine.Models.Ogame
         public void Configure(EntityTypeBuilder<Planet> builder)
         {
             builder.ToTable("Planet", "og")
-                .HasKey(p => new { p.Id, p.ServerId });
-            builder.HasOne(p => p.Server)
-                .WithOne();
+                .HasKey(e => new { e.Id, e.ServerId });
         }
     }
 }
