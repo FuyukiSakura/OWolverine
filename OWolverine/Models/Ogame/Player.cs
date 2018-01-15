@@ -65,7 +65,6 @@ namespace OWolverine.Models.Ogame
             }
             set => _AllianceId = value == null ? -1 : (int)value;
         }
-        [ForeignKey("AllianceId")]
         public Alliance Alliance { get; set; }
 
         //Status Property
@@ -90,6 +89,9 @@ namespace OWolverine.Models.Ogame
             builder.HasOne(e => e.Server)
                 .WithMany(u => u.Players)
                 .HasForeignKey(e => e.ServerId);
+            builder.HasOne(e => e.Alliance)
+                .WithMany(a => a.Members)
+                .HasForeignKey(e => new { e.AllianceId, e.ServerId });
         }
     }
 }

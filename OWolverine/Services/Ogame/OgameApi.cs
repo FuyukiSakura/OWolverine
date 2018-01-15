@@ -14,6 +14,7 @@ namespace OWolverine.Services.Ogame
     public static class OgameApi
     {
         private const string playerAPI = "players.xml";
+        private const string allianceAPI = "alliances.xml";
         private const string universeAPI = "universe.xml";
         private const string universes = "universes.xml";
         private const string serverDataAPI = "serverData.xml";
@@ -50,7 +51,15 @@ namespace OWolverine.Services.Ogame
         public static Player[] GetAllPlayers(int serverId)
         {
             var serializer = new XmlSerializer(typeof(PlayerList));
-            return ((PlayerList)serializer.Deserialize(RequestAPI(serverId, playerAPI))).Players.ToArray();
+            var players = ((PlayerList)serializer.Deserialize(RequestAPI(serverId, playerAPI))).Players;
+            players.ForEach(p => p.AllianceId = null); //Unset alliance
+            return players.ToArray();
+        }
+
+        public static Alliance[] GetAllAlliance(int serverId)
+        {
+            var serializer = new XmlSerializer(typeof(AllianceList));
+            return ((AllianceList)serializer.Deserialize(RequestAPI(serverId, allianceAPI))).Alliances.ToArray();
         }
 
         /// <summary>

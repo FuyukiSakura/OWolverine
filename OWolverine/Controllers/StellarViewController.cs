@@ -45,7 +45,9 @@ namespace OWolverine.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Universes.ToListAsync());
+            return View(await _context.Universes
+                .Include(u => u.Players)
+                .ToListAsync());
         }
 
         public async Task<IActionResult> RefreshUniverse(int id)
@@ -54,12 +56,9 @@ namespace OWolverine.Controllers
             if (universe == null)
             {
                 return NotFound();
-            }
-            var result = OgameApi.GetAllPlayers(id);
-            foreach(var player in result)
-            {
-                _context.Players.Add(player);
-            }
+            }           
+            universe.Players.AddRange(OgameApi.GetAllPlayers(id));
+            universe.Alliance.AddRange(OgameApi.GetAllAlliance(id));
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
