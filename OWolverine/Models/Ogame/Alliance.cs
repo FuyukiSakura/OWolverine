@@ -28,7 +28,22 @@ namespace OWolverine.Models.Ogame
         [XmlAttribute("tag")]
         public string Tag { get; set; }
         [XmlAttribute("founder")]
-        public int FounderId { get; set; }
+        [NotMapped]
+        public int _founderId { get; set; }
+        public int? FounderId {
+            get
+            {
+                if (_founderId == -1)
+                {
+                    return null;
+                }
+                return _founderId;
+            }
+            set
+            {
+                _founderId = value == null ? -1 : (int)value;
+            }
+        }
         [XmlIgnore]
         public Player Founder { get; set; }
         [XmlElement("player")]
