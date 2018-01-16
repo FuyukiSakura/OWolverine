@@ -14,9 +14,9 @@ namespace OWolverine.Models.Ogame
     [XmlRoot(ElementName = "planet")]
     public class Planet
     {
-        [XmlAttribute("id")]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
+        [XmlAttribute("id")]
+        public int PlanetId { get; set; }
         [XmlAttribute("name")]
         public string Name { get; set; }
 
@@ -40,7 +40,6 @@ namespace OWolverine.Models.Ogame
         public Player Owner { get; set; } = new Player();
 
         public int ServerId { get; set; }
-        [ForeignKey("ServerId")]
         public Universe Server { get; set; }
         public DateTime LastUpdated { get; set; }
     }
@@ -57,7 +56,10 @@ namespace OWolverine.Models.Ogame
         public void Configure(EntityTypeBuilder<Planet> builder)
         {
             builder.ToTable("Planet", "og")
-                .HasKey(e => new { e.Id, e.ServerId });
+                .HasAlternateKey(e => new { e.Id, e.ServerId });
+            builder.HasOne(e => e.Server)
+                .WithMany(u => u.Planets)
+                .HasForeignKey(e => e.ServerId);
         }
     }
 }

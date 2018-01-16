@@ -60,7 +60,6 @@ namespace OWolverine.Models.Ogame
         [InverseProperty("Server")]
         public List<Alliance> Alliance { get; set; } = new List<Alliance>();
         [XmlIgnore]
-        [InverseProperty("Server")]
         public List<Planet> Planets { get; set; } = new List<Planet>();
     }
 }

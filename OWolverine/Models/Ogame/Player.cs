@@ -19,9 +19,9 @@ namespace OWolverine.Models.Ogame
 
     public class Player
     {
-        [XmlAttribute("id")]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
+        [XmlAttribute("id")]
+        public int PlayerId { get; set; }
         [XmlAttribute("name")]
         public string Name { get; set; }
         [XmlAttribute("status")]
@@ -84,16 +84,17 @@ namespace OWolverine.Models.Ogame
         public void Configure(EntityTypeBuilder<Player> builder)
         {
             builder.ToTable("Player", "og");
-            builder.HasKey(e => new { e.Id, e.ServerId });
+            builder.HasAlternateKey(e => new { e.Id, e.ServerId });
             builder.HasOne(e => e.Server)
                 .WithMany(u => u.Players)
                 .HasForeignKey(e => e.ServerId);
             builder.HasOne(e => e.Alliance)
                 .WithMany(a => a.Members)
-                .HasForeignKey(e => new { e.AllianceId, e.ServerId });
+                .HasForeignKey(e => e.AllianceId)
+                .OnDelete(DeleteBehavior.SetNull);
             builder.HasMany(e => e.Planets)
                 .WithOne(p => p.Owner)
-                .HasForeignKey(p => new { p.Id, p.ServerId });
+                .HasForeignKey(p => p.OwnerId);
         }
     }
 }

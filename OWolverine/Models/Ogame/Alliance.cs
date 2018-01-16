@@ -20,9 +20,9 @@ namespace OWolverine.Models.Ogame
 
     public class Alliance
     {
-        [XmlAttribute("id")]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
+        [XmlAttribute("id")]
+        public int AllianceId { get; set; }
         [XmlAttribute("name")]
         public string Name { get; set; }
         [XmlAttribute("tag")]
@@ -46,10 +46,10 @@ namespace OWolverine.Models.Ogame
         public void Configure(EntityTypeBuilder<Alliance> builder)
         {
             builder.ToTable("Alliance", "og");
-            builder.HasKey(e => new { e.Id, e.ServerId });
+            builder.HasAlternateKey(e => new { e.Id, e.ServerId });
             builder.HasOne(e => e.Founder)
                 .WithOne()
-                .HasForeignKey<Alliance>(e => new { e.FounderId, e.ServerId });
+                .HasForeignKey<Alliance>(e => e.FounderId);
         }
     }
 }
