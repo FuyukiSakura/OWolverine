@@ -56,7 +56,7 @@ namespace OWolverine.Models.Ogame
         public void Configure(EntityTypeBuilder<Planet> builder)
         {
             builder.ToTable("Planet", "og")
-                .HasAlternateKey(e => new { e.Id, e.ServerId });
+                .HasAlternateKey(e => new { e.PlanetId, e.ServerId });
             builder.HasOne(e => e.Server)
                 .WithMany(u => u.Planets)
                 .HasForeignKey(e => e.ServerId);

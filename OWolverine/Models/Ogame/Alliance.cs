@@ -61,7 +61,7 @@ namespace OWolverine.Models.Ogame
         public void Configure(EntityTypeBuilder<Alliance> builder)
         {
             builder.ToTable("Alliance", "og");
-            builder.HasAlternateKey(e => new { e.Id, e.ServerId });
+            builder.HasAlternateKey(e => new { e.AllianceId, e.ServerId });
             builder.HasOne(e => e.Founder)
                 .WithOne()
                 .HasForeignKey<Alliance>(e => e.FounderId);
