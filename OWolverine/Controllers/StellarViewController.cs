@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using OWolverine.Data;
 using Microsoft.EntityFrameworkCore;
 using OWolverine.Services.Ogame;
+using CSharpUtilities;
 
 namespace OWolverine.Controllers
 {
@@ -59,7 +60,26 @@ namespace OWolverine.Controllers
             }
 
             //Load players into DB
-            _context.Players.UpdateRange(OgameApi.GetAllPlayers(id));
+            var playerList = OgameApi.GetAllPlayers(id);
+            //Assign ID if exist in database
+            foreach(var player in playerList)
+            {
+                var dbItem = _context.Players.FirstOrDefault(e => e.PlayerId == player.PlayerId && e.ServerId == player.ServerId);
+                if (player == null)
+                {
+                    //New object
+                    player.Id = 0;
+                }
+                else
+                {
+                    player.Id = dbItem.Id;
+                    dbItem.Update(player);
+                }
+            }
+            //Remove players no longer exist
+            _context.Players.RemoveRange(_context.Players.Where(
+                p => !playerList.Any(ps => ps.Id == p.Id)));
+            _context.AddRange(playerList.Where(p => p.Id == 0)); //Add new players
             await _context.SaveChangesAsync();
 
             //Load Alliance into DB

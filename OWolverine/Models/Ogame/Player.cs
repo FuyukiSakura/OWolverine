@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using OWolverine.Models.Database;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -17,7 +18,7 @@ namespace OWolverine.Models.Ogame
         public List<Player> Players { get; set; }
     }
 
-    public class Player
+    public class Player : IUpdatable
     {
         public int Id { get; set; }
         [XmlAttribute("id")]
@@ -77,6 +78,15 @@ namespace OWolverine.Models.Ogame
         public int ServerId { get;set; }
         public Universe Server { get; set; }
         public DateTime LastUpdate { get; set; }
+
+        public void Update(IUpdatable obj)
+        {
+            if(obj is Player player)
+            {
+                Name = player.Name;
+                Status = player.Status;
+            }
+        }
     }
 
     public class PlayerConfiguration : IEntityTypeConfiguration<Player>
