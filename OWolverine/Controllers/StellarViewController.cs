@@ -85,17 +85,21 @@ namespace OWolverine.Controllers
             //Load Alliance into DB
             var alliance = OgameApi.GetAllAlliance(id);
             alliance.ForEach(a => {
-                a.Founder = _context.Players.FirstOrDefault(p => p.Id == a.FounderId && p.ServerId == a.ServerId);
+                a.Founder = _context.Players.FirstOrDefault(p => p.PlayerId == a.FounderId && p.ServerId == a.ServerId);
+                if(a.Founder == null)
+                {
+                    //Unset founder ID if founder not found
+                    a.FounderId = null;
+                }
+
                 for (var i= 0; i<a.Members.Count;i++)
                 {
-                    a.Members[i] = _context.Players.FirstOrDefault(p => p.Id == a.Members[i].Id && p.ServerId == a.Members[i].ServerId);
+                    //Replace member placeholder with database object
+                    a.Members[i] = _context.Players.FirstOrDefault(p => p.PlayerId == a.Members[i].PlayerId && p.ServerId == a.Members[i].ServerId);
                 }
             });
-            foreach(var a in alliance)
-            {
-                _context.Alliances.AddRange(a);
-                await _context.SaveChangesAsync();
-            }
+            _context.Alliances.UpdateRange(alliance);
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
