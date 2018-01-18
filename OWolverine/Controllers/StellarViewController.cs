@@ -61,26 +61,33 @@ namespace OWolverine.Controllers
 
             //Load players into DB
             var playerList = OgameApi.GetAllPlayers(id);
-            //Assign ID if exist in database
-            foreach(var player in playerList)
+            var players = playerList.Players;
+            var playersLastUpdate = DateTimeHelper.UnixTimeStampToDateTime(playerList.LastUpdate);
+            if (playersLastUpdate != universe.PlayersLastUpdate)
             {
-                var dbItem = _context.Players.FirstOrDefault(e => e.PlayerId == player.PlayerId && e.ServerId == player.ServerId);
-                if (player == null)
+                //Only update if the API Date is different
+                //Assign ID if exist in database
+                foreach (var player in players)
                 {
-                    //New object
-                    player.Id = 0;
+                    var dbItem = _context.Players.FirstOrDefault(e => e.PlayerId == player.PlayerId && e.ServerId == player.ServerId);
+                    if (player == null)
+                    {
+                        //New object
+                        player.Id = 0;
+                    }
+                    else
+                    {
+                        player.Id = dbItem.Id;
+                        dbItem.Update(player);
+                    }
                 }
-                else
-                {
-                    player.Id = dbItem.Id;
-                    dbItem.Update(player);
-                }
+                //Remove players no longer exist
+                _context.Players.RemoveRange(_context.Players.Where(
+                    p => !players.Any(ps => ps.Id == p.Id)));
+                _context.AddRange(players.Where(p => p.Id == 0)); //Add new players
+                universe.PlayersLastUpdate = playersLastUpdate; //Update API Date
+                await _context.SaveChangesAsync();
             }
-            //Remove players no longer exist
-            _context.Players.RemoveRange(_context.Players.Where(
-                p => !playerList.Any(ps => ps.Id == p.Id)));
-            _context.AddRange(playerList.Where(p => p.Id == 0)); //Add new players
-            await _context.SaveChangesAsync();
 
             //Load Alliance into DB
             var alliance = OgameApi.GetAllAlliance(id);

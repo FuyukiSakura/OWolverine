@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using OWolverine.Models.Database;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -15,10 +16,12 @@ namespace OWolverine.Models.Ogame
     {
         [XmlElement("alliance")]
         public List<Alliance> Alliances { get; set; }
+        [XmlAttribute("timestamp")]
+        public double LastUpdate { get; set; }
     }
 
 
-    public class Alliance
+    public class Alliance : IUpdatable
     {
         public int Id { get; set; }
         [XmlAttribute("id")]
@@ -54,6 +57,20 @@ namespace OWolverine.Models.Ogame
         public int ServerId { get; set; }
         [ForeignKey("ServerId")]
         public Universe Server { get; set; }
+
+        /// <summary>
+        /// Update alliance with another alliance object
+        /// </summary>
+        /// <param name="obj"></param>
+        public void Update(IUpdatable obj)
+        {
+            if(obj is Alliance alliance)
+            {
+                FounderId = alliance.FounderId;
+                Name = alliance.Name;
+                Tag = alliance.Tag;
+            }
+        }
     }
 
     public class AllianceConfiguration : IEntityTypeConfiguration<Alliance>

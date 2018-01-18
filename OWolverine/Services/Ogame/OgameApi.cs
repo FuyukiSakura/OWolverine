@@ -46,11 +46,11 @@ namespace OWolverine.Services.Ogame
         /// </summary>
         /// <param name="serverId"></param>
         /// <returns></returns>
-        public static List<Player> GetAllPlayers(int serverId)
+        public static PlayerList GetAllPlayers(int serverId)
         {
             var serializer = new XmlSerializer(typeof(PlayerList));
-            var playerList = ((PlayerList)serializer.Deserialize(RequestAPI(serverId, playerAPI))).Players;
-            playerList.ForEach(p => {
+            var playerList = ((PlayerList)serializer.Deserialize(RequestAPI(serverId, playerAPI)));
+            playerList.Players.ForEach(p => {
                 p.AllianceId = null; //Unset alliance
                 p.ServerId = serverId; //Attach server
             });

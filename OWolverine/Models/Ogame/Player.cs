@@ -16,6 +16,8 @@ namespace OWolverine.Models.Ogame
     {
         [XmlElement("player")]
         public List<Player> Players { get; set; }
+        [XmlAttribute("timestamp")]
+        public double LastUpdate { get; set; }
     }
 
     public class Player : IUpdatable
@@ -79,6 +81,10 @@ namespace OWolverine.Models.Ogame
         public Universe Server { get; set; }
         public DateTime LastUpdate { get; set; }
 
+        /// <summary>
+        /// Update player with another player object
+        /// </summary>
+        /// <param name="obj"></param>
         public void Update(IUpdatable obj)
         {
             if(obj is Player player)

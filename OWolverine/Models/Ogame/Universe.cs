@@ -56,10 +56,13 @@ namespace OWolverine.Models.Ogame
         //Data
         [XmlIgnore]
         public List<Player> Players { get; set; } = new List<Player>();
+        public DateTime? PlayersLastUpdate { get; set; }
         [XmlIgnore]
         [InverseProperty("Server")]
         public List<Alliance> Alliance { get; set; } = new List<Alliance>();
+        public DateTime? AllianceLastUpdate { get; set; }
         [XmlIgnore]
         public List<Planet> Planets { get; set; } = new List<Planet>();
+        public DateTime? PlanetsLastUpdate { get; set; }
     }
 }
