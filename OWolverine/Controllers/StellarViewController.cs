@@ -138,6 +138,8 @@ namespace OWolverine.Controllers
                 universe.AllianceLastUpdate = alliancesLastUpdate; //Update API Date
                 await _context.SaveChangesAsync();
             }
+            universe.LastUpdate = DateTime.Now;
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
