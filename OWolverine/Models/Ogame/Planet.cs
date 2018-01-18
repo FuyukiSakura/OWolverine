@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using OWolverine.Models.Database;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -10,38 +11,60 @@ using System.Xml.Serialization;
 
 namespace OWolverine.Models.Ogame
 {
+    [XmlRoot("universe")]
+    public class PlanetList
+    {
+        [XmlElement("planet")]
+        public List<Planet> Planets { get; set; }
+        [XmlAttribute("timestamp")]
+        public double LastUpdate { get; set; }
+    }
+
     [Serializable()]
     [XmlRoot(ElementName = "planet")]
-    public class Planet
+    public class Planet : IUpdatable
     {
         public int Id { get; set; }
         [XmlAttribute("id")]
         public int PlanetId { get; set; }
         [XmlAttribute("name")]
         public string Name { get; set; }
+        [XmlElement("moon")]
+        public Moon Moon { get; set; }
 
-        private Coordinate _coords { get; set; } = new Coordinate();
+        [NotMapped]
+        public Coordinate Coords { get; set; } = new Coordinate();
         [XmlAttribute("coords")]
-        public string Coords {
+        public string Coord {
             get {
-                return String.Format("{0}:{1}:{2}", _coords.Galaxy, _coords.System, _coords.Location);
+                return String.Format("{0}:{1}:{2}", Coords.Galaxy, Coords.System, Coords.Location);
             }
             set {
                 var arr = value.Split(":");
-                _coords.Galaxy = Convert.ToInt32(arr[0]);
-                _coords.System = Convert.ToInt32(arr[1]);
-                _coords.Location = Convert.ToInt32(arr[2]);
+                Coords.Galaxy = Convert.ToInt32(arr[0]);
+                Coords.System = Convert.ToInt32(arr[1]);
+                Coords.Location = Convert.ToInt32(arr[2]);
             }
         }
 
         [XmlAttribute("player")]
         public int OwnerId { get; set; }
         [XmlIgnore]
-        public Player Owner { get; set; } = new Player();
+        public Player Owner { get; set; }
 
         public int ServerId { get; set; }
         public Universe Server { get; set; }
         public DateTime LastUpdated { get; set; }
+
+        public void Update(IUpdatable obj)
+        {
+            if(obj is Planet planet)
+            {
+                Name = planet.Name;
+                if (Moon == null) Moon = new Moon(); //Create new moon if not exists
+                Moon.Update(planet.Moon);
+            }
+        }
     }
 
     public class Coordinate
@@ -60,6 +83,35 @@ namespace OWolverine.Models.Ogame
             builder.HasOne(e => e.Server)
                 .WithMany(u => u.Planets)
                 .HasForeignKey(e => e.ServerId);
+        }
+    }
+
+    public class Moon : IUpdatable
+    {
+        public int Id { get; set; }
+        [XmlAttribute("name")]
+        public string Name { get; set; }
+        [XmlAttribute("size")]
+        public int Size { get; set; }
+
+        public void Update(IUpdatable obj)
+        {
+            if(obj is Moon moon)
+            {
+                Name = moon.Name;
+                Size = moon.Size;
+            }
+        }
+    }
+
+    public class MoonConfiguration : IEntityTypeConfiguration<Moon>
+    {
+        public void Configure(EntityTypeBuilder<Moon> builder)
+        {
+            builder.ToTable("Moon", "og");
+            builder.HasOne<Planet>()
+                .WithOne()
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

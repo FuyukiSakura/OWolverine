@@ -62,7 +62,7 @@ namespace OWolverine.Services.Ogame
         /// </summary>
         /// <param name="serverId"></param>
         /// <returns></returns>
-        public static AllianceList GetAllAlliance(int serverId)
+        public static AllianceList GetAllAlliances(int serverId)
         {
             var serializer = new XmlSerializer(typeof(AllianceList));
             var allianceList = ((AllianceList)serializer.Deserialize(RequestAPI(serverId, allianceAPI)));
@@ -72,6 +72,17 @@ namespace OWolverine.Services.Ogame
                 a.Members.ForEach(m => m.ServerId = serverId);
             }); //Assign server id
             return allianceList;
+        }
+
+        public static PlanetList GetAllPlanets(int serverId)
+        {
+            var serializer = new XmlSerializer(typeof(PlanetList));
+            var planetList = ((PlanetList)serializer.Deserialize(RequestAPI(serverId, universeAPI)));
+            planetList.Planets.ForEach(a =>
+            {
+                a.ServerId = serverId;
+            }); //Assign server id
+            return planetList;
         }
 
         /// <summary>

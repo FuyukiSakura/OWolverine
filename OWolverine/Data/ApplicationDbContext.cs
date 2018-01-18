@@ -29,6 +29,7 @@ namespace OWolverine.Data
             builder.ApplyConfiguration(new PlayerConfiguration());
             builder.ApplyConfiguration(new AllianceConfiguration());
             builder.ApplyConfiguration(new PlanetConfiguration());
+            builder.Entity<Moon>().ToTable("Moon", "og");
         }
     }
 }

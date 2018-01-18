@@ -86,6 +86,10 @@ namespace OWolverine.Models.Ogame
             builder.HasOne(e => e.Founder)
                 .WithOne()
                 .HasForeignKey<Alliance>(e => e.FounderId);
+            builder.HasMany(e => e.Members)
+                .WithOne(p => p.Alliance)
+                .HasForeignKey(p => p.AllianceId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

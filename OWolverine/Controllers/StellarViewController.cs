@@ -69,20 +69,15 @@ namespace OWolverine.Controllers
                 foreach (var player in playerList)
                 {
                     var dbItem = _context.Players.FirstOrDefault(e => e.PlayerId == player.PlayerId && e.ServerId == player.ServerId);
-                    if (dbItem == null)
-                    {
-                        //New object
-                        player.Id = 0;
-                    }
-                    else
-                    {
-                        //Assign ID if exist in database
+                    if (dbItem != null)
+                    { 
+                        //Assign ID if exists in database
                         player.Id = dbItem.Id;
                         //Update the context
                         dbItem.Update(player);
                     }
                 }
-                //Remove players no longer exist
+                //Remove players no longer exists
                 _context.Players.RemoveRange(_context.Players.Where(
                     e => !playerList.Any(p => e.Id == p.Id)));
                 _context.AddRange(playerList.Where(p => p.Id == 0)); //Add new players
@@ -91,12 +86,12 @@ namespace OWolverine.Controllers
             }
 
             //Load Alliance into DB
-            var allianceData = OgameApi.GetAllAlliance(id);
+            var allianceData = OgameApi.GetAllAlliances(id);
             var allianceList = allianceData.Alliances;
             var alliancesLastUpdate = DateTimeHelper.UnixTimeStampToDateTime(allianceData.LastUpdate);
             if (alliancesLastUpdate != universe.AllianceLastUpdate)
             {
-                _context.Alliances.Include(e => e.Members); //Load member list
+                //Only update if the API Date is different
                 allianceList.ForEach(a =>
                 {
                     var dbItem = _context.Alliances.FirstOrDefault(e => e.AllianceId == a.AllianceId && e.ServerId == a.ServerId);
@@ -118,25 +113,48 @@ namespace OWolverine.Controllers
                         a.Members[i] = _context.Players.FirstOrDefault(p => p.PlayerId == a.Members[i].PlayerId && p.ServerId == a.Members[i].ServerId);
                     }
 
-                    if (dbItem == null)
+                    if (dbItem != null)
                     {
-                        //New object
-                        a.Id = 0;
-                    }
-                    else
-                    {
-                        //Assign ID if exist in database
+                        //Assign ID if exists in database
                         a.Id = dbItem.Id;
                         //Update the context
                         dbItem.Update(a);
                     }
                 });
-                //Remove alliances no longer exist
+                //Remove alliances no longer exists
                 _context.Alliances.RemoveRange(_context.Alliances.Where(
                     e => !allianceList.Any(a => a.Id == e.Id)));
                 _context.AddRange(allianceList.Where(a => a.Id == 0)); //Add new alliances
                 universe.AllianceLastUpdate = alliancesLastUpdate; //Update API Date
                 await _context.SaveChangesAsync();
+            }
+
+            //Load Planet into DB
+            var planetData = OgameApi.GetAllPlanets(id);
+            var planetList = planetData.Planets;
+            var planetLastUpdate = DateTimeHelper.UnixTimeStampToDateTime(planetData.LastUpdate);
+            if (planetLastUpdate != universe.PlanetsLastUpdate)
+            {
+                //Only update if the API Date is different
+                planetList.ForEach(p =>
+                {
+                    var dbItem = _context.Planets.FirstOrDefault(e => e.PlanetId == p.PlanetId && e.ServerId == p.ServerId);
+                    if(dbItem != null)
+                    {
+                        //Assign ID if exists in database
+                        p.Id = dbItem.Id;
+                        //Update the context
+                        p.Update(dbItem);
+                    }
+
+                    //Assign real owner ID
+                    p.OwnerId = _context.Players.First(e => e.PlayerId == p.OwnerId && e.ServerId == p.ServerId).Id;
+                });
+                //Remove planets no longer exists
+                _context.RemoveRange(_context.Planets.Where(
+                    e => !planetList.Any(p => e.Id == p.Id)));
+                _context.AddRange(planetList.Where(p => p.Id == 0));
+                universe.PlanetsLastUpdate = planetLastUpdate;
             }
             universe.LastUpdate = DateTime.Now;
             await _context.SaveChangesAsync();

@@ -104,10 +104,6 @@ namespace OWolverine.Models.Ogame
             builder.HasOne(e => e.Server)
                 .WithMany(u => u.Players)
                 .HasForeignKey(e => e.ServerId);
-            builder.HasOne(e => e.Alliance)
-                .WithMany(a => a.Members)
-                .HasForeignKey(e => e.AllianceId)
-                .OnDelete(DeleteBehavior.SetNull);
             builder.HasMany(e => e.Planets)
                 .WithOne(p => p.Owner)
                 .HasForeignKey(p => p.OwnerId);
