@@ -62,11 +62,11 @@ namespace OWolverine.Services.Ogame
         /// </summary>
         /// <param name="serverId"></param>
         /// <returns></returns>
-        public static List<Alliance> GetAllAlliance(int serverId)
+        public static AllianceList GetAllAlliance(int serverId)
         {
             var serializer = new XmlSerializer(typeof(AllianceList));
-            var allianceList = ((AllianceList)serializer.Deserialize(RequestAPI(serverId, allianceAPI))).Alliances;
-            allianceList.ForEach(a =>
+            var allianceList = ((AllianceList)serializer.Deserialize(RequestAPI(serverId, allianceAPI)));
+            allianceList.Alliances.ForEach(a =>
             {
                 a.ServerId = serverId;
                 a.Members.ForEach(m => m.ServerId = serverId);

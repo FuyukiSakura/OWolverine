@@ -60,53 +60,84 @@ namespace OWolverine.Controllers
             }
 
             //Load players into DB
-            var playerList = OgameApi.GetAllPlayers(id);
-            var players = playerList.Players;
-            var playersLastUpdate = DateTimeHelper.UnixTimeStampToDateTime(playerList.LastUpdate);
+            var playersData = OgameApi.GetAllPlayers(id);
+            var playerList = playersData.Players;
+            var playersLastUpdate = DateTimeHelper.UnixTimeStampToDateTime(playersData.LastUpdate);
             if (playersLastUpdate != universe.PlayersLastUpdate)
             {
                 //Only update if the API Date is different
-                //Assign ID if exist in database
-                foreach (var player in players)
+                foreach (var player in playerList)
                 {
                     var dbItem = _context.Players.FirstOrDefault(e => e.PlayerId == player.PlayerId && e.ServerId == player.ServerId);
-                    if (player == null)
+                    if (dbItem == null)
                     {
                         //New object
                         player.Id = 0;
                     }
                     else
                     {
+                        //Assign ID if exist in database
                         player.Id = dbItem.Id;
+                        //Update the context
                         dbItem.Update(player);
                     }
                 }
                 //Remove players no longer exist
                 _context.Players.RemoveRange(_context.Players.Where(
-                    p => !players.Any(ps => ps.Id == p.Id)));
-                _context.AddRange(players.Where(p => p.Id == 0)); //Add new players
+                    e => !playerList.Any(p => e.Id == p.Id)));
+                _context.AddRange(playerList.Where(p => p.Id == 0)); //Add new players
                 universe.PlayersLastUpdate = playersLastUpdate; //Update API Date
                 await _context.SaveChangesAsync();
             }
 
             //Load Alliance into DB
-            var alliance = OgameApi.GetAllAlliance(id);
-            alliance.ForEach(a => {
-                a.Founder = _context.Players.FirstOrDefault(p => p.PlayerId == a.FounderId && p.ServerId == a.ServerId);
-                if(a.Founder == null)
+            var allianceData = OgameApi.GetAllAlliance(id);
+            var allianceList = allianceData.Alliances;
+            var alliancesLastUpdate = DateTimeHelper.UnixTimeStampToDateTime(allianceData.LastUpdate);
+            if (alliancesLastUpdate != universe.AllianceLastUpdate)
+            {
+                _context.Alliances.Include(e => e.Members); //Load member list
+                allianceList.ForEach(a =>
                 {
-                    //Unset founder ID if founder not found
-                    a.FounderId = null;
-                }
+                    var dbItem = _context.Alliances.FirstOrDefault(e => e.AllianceId == a.AllianceId && e.ServerId == a.ServerId);
+                    a.Founder = _context.Players.FirstOrDefault(p => p.PlayerId == a.FounderId && p.ServerId == a.ServerId);
+                    if (a.Founder == null)
+                    {
+                        //Unset founder ID if founder not found
+                        a.FounderId = null;
+                    }
+                    else
+                    {
+                        //Assign ID of player in DB
+                        a.FounderId = a.Founder.Id;
+                    }
 
-                for (var i= 0; i<a.Members.Count;i++)
-                {
-                    //Replace member placeholder with database object
-                    a.Members[i] = _context.Players.FirstOrDefault(p => p.PlayerId == a.Members[i].PlayerId && p.ServerId == a.Members[i].ServerId);
-                }
-            });
-            _context.Alliances.UpdateRange(alliance);
-            await _context.SaveChangesAsync();
+                    for (var i = 0; i < a.Members.Count; i++)
+                    {
+                        //Replace member placeholder with database object
+                        a.Members[i] = _context.Players.FirstOrDefault(p => p.PlayerId == a.Members[i].PlayerId && p.ServerId == a.Members[i].ServerId);
+                    }
+
+                    if (dbItem == null)
+                    {
+                        //New object
+                        a.Id = 0;
+                    }
+                    else
+                    {
+                        //Assign ID if exist in database
+                        a.Id = dbItem.Id;
+                        //Update the context
+                        dbItem.Update(a);
+                    }
+                });
+                //Remove alliances no longer exist
+                _context.Alliances.RemoveRange(_context.Alliances.Where(
+                    e => !allianceList.Any(a => a.Id == e.Id)));
+                _context.AddRange(allianceList.Where(a => a.Id == 0)); //Add new alliances
+                universe.AllianceLastUpdate = alliancesLastUpdate; //Update API Date
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 

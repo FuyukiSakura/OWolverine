@@ -50,7 +50,7 @@ namespace OWolverine.Models.Ogame
         [XmlIgnore]
         public Player Founder { get; set; }
         [XmlElement("player")]
-        public List<Player> Members { get; set; }
+        public List<Player> Members { get; set; } = new List<Player>();
         [XmlAttribute("open")]
         public bool IsOpen { get; set; }
 
@@ -69,6 +69,10 @@ namespace OWolverine.Models.Ogame
                 FounderId = alliance.FounderId;
                 Name = alliance.Name;
                 Tag = alliance.Tag;
+                //Remove members that have left
+                Members.RemoveAll(e => !alliance.Members.Any(a => a.Id == e.Id));
+                //Add new members
+                Members.AddRange(Members.Where(e => !alliance.Members.Any(a => a.Id == e.Id)));
             }
         }
     }
