@@ -133,6 +133,7 @@ namespace OWolverine.Controllers
             var planetData = OgameApi.GetAllPlanets(id);
             var planetList = planetData.Planets;
             var planetLastUpdate = DateTimeHelper.UnixTimeStampToDateTime(planetData.LastUpdate);
+            var removePlanetList = new List<Planet>();
             if (planetLastUpdate != universe.PlanetsLastUpdate)
             {
                 //Only update if the API Date is different
@@ -148,8 +149,19 @@ namespace OWolverine.Controllers
                     }
 
                     //Assign real owner ID
-                    p.OwnerId = _context.Players.First(e => e.PlayerId == p.OwnerId && e.ServerId == p.ServerId).Id;
+                    var owner = _context.Players.FirstOrDefault(e => e.PlayerId == p.OwnerId && e.ServerId == p.ServerId);
+                    if (owner == null) {
+                        //Player removed planet no longer exists
+                        removePlanetList.Add(p);
+                    }
+                    else
+                    {
+                        p.OwnerId = owner.Id;
+                    }
                 });
+                //Remove planets with player deleted
+                planetList.RemoveAll(p => removePlanetList.Contains(p));
+
                 //Remove planets no longer exists
                 _context.RemoveRange(_context.Planets.Where(
                     e => !planetList.Any(p => e.Id == p.Id)));
