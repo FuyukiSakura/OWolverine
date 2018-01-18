@@ -72,7 +72,7 @@ namespace OWolverine.Models.Ogame
                 //Remove members that have left
                 Members.RemoveAll(e => !alliance.Members.Any(a => a.Id == e.Id));
                 //Add new members
-                Members.AddRange(Members.Where(e => !alliance.Members.Any(a => a.Id == e.Id)));
+                Members.AddRange(alliance.Members.Where(a => !Members.Any(e => e.Id == a.Id)));
             }
         }
     }
