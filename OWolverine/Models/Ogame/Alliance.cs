@@ -55,7 +55,6 @@ namespace OWolverine.Models.Ogame
         public bool IsOpen { get; set; }
 
         public int ServerId { get; set; }
-        [ForeignKey("ServerId")]
         public Universe Server { get; set; }
 
         /// <summary>
@@ -83,12 +82,12 @@ namespace OWolverine.Models.Ogame
         {
             builder.ToTable("Alliance", "og");
             builder.HasAlternateKey(e => new { e.AllianceId, e.ServerId });
+            builder.HasOne(e => e.Server)
+                .WithMany(u => u.Alliances)
+                .HasForeignKey(e => e.ServerId);
             builder.HasOne(e => e.Founder)
                 .WithOne()
-                .HasForeignKey<Alliance>(e => e.FounderId);
-            builder.HasMany(e => e.Members)
-                .WithOne(p => p.Alliance)
-                .HasForeignKey(p => p.AllianceId)
+                .HasForeignKey<Alliance>(e => e.FounderId)
                 .OnDelete(DeleteBehavior.SetNull);
         }
     }
