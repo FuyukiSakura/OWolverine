@@ -40,7 +40,6 @@ namespace CSharpUtilities
                         p.SetValue(dest, sourceProp.GetValue(source, null), null);
                     }
                 }
-
             }
         }
     }

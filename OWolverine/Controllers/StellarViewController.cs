@@ -45,12 +45,13 @@ namespace OWolverine.Controllers
             _signInManager = signInManager;
         }
 
+        /// <summary>
+        /// Get server list and random target on Index
+        /// </summary>
+        /// <returns></returns>
         public async Task<IActionResult> Index()
         {
-            var vm = new StarMapSearchViewModel
-            {
-                Servers = new List<UniverseViewModel>()
-            };
+            var vm = new StarMapSearchViewModel();
             var servers = await _context.Universes
                 .Include(u => u.Players)
                 .ToListAsync();
@@ -65,6 +66,24 @@ namespace OWolverine.Controllers
                 vm.Servers.Add(new UniverseViewModel(u, playerName));
             }
             return View(vm);
+        }
+
+        /// <summary>
+        /// Search player from database
+        /// </summary>
+        /// <param name="vm"></param>
+        /// <returns></returns>
+        public IActionResult Search(StarMapSearchViewModel vm)
+        {
+            if (ModelState.IsValid)
+            {
+                vm.Players = _context.Universes
+                    .Include(u => u.Players)
+                    .First(u => u.Id == vm.ServerId)
+                    .Players
+                    .Where(p => p.Name.Contains(vm.PlayerName)).ToList();
+            }
+            return View("Index", vm);
         }
 
         public async Task<IActionResult> RefreshUniverse(int id)

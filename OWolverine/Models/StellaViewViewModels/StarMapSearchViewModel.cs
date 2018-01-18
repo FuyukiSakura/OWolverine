@@ -13,9 +13,10 @@ namespace OWolverine.Models.StellaViewViewModels
         [Required]
         public int ServerId { get; set; }
         public string PlayerName { get; set; }
-        
+
         //Display Elements
-        public List<UniverseViewModel> Servers { get; set; }
+        public List<Player> Players { get; set; } = new List<Player>();
+        public List<UniverseViewModel> Servers { get; set; } = new List<UniverseViewModel>();
     }
 
     public class UniverseViewModel
