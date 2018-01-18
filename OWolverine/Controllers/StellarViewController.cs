@@ -15,6 +15,7 @@ using OWolverine.Data;
 using Microsoft.EntityFrameworkCore;
 using OWolverine.Services.Ogame;
 using CSharpUtilities;
+using OWolverine.Models.StellaViewViewModels;
 
 namespace OWolverine.Controllers
 {
@@ -46,9 +47,24 @@ namespace OWolverine.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Universes
+            var vm = new StarMapSearchViewModel
+            {
+                Servers = new List<UniverseViewModel>()
+            };
+            var servers = await _context.Universes
                 .Include(u => u.Players)
-                .ToListAsync());
+                .ToListAsync();
+            foreach (var u in servers)
+            {
+                var tryResult = u.Players.Where(e => e.IsActive).OrderBy(r => Guid.NewGuid()).Take(1).ToArray();
+                var playerName = "";
+                if (tryResult.Any())
+                {
+                     playerName = tryResult[0].Name;
+                }
+                vm.Servers.Add(new UniverseViewModel(u, playerName));
+            }
+            return View(vm);
         }
 
         public async Task<IActionResult> RefreshUniverse(int id)

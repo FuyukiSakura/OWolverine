@@ -78,6 +78,14 @@ namespace OWolverine.Models.Ogame
         public bool IsVocation { get; set; }
         public bool IsInactive { get; set; }
         public bool IsLeft { get; set; }
+        [NotMapped]
+        public bool IsActive
+        {
+            get
+            {
+                return !IsAdmin && !IsBanned && !IsInactive && !IsLeft && !IsVocation;
+            }
+        }
 
         public List<Planet> Planets { get; set; } = new List<Planet>();
         public int ServerId { get;set; }

@@ -1,4 +1,5 @@
-﻿@model IEnumerable<OWolverine.Models.Ogame.Universe>
+﻿@namespace OWolverine.Models.StellaViewViewModels
+@model StarMapSearchViewModel
 @{
     ViewData["Title"] = "Stellar View";
 }
@@ -8,40 +9,12 @@
     <div class="col-md-12">
         <form class="form-inline" id="player-request-form">
             <div class="form-group">
-                <label for="server-name">伺服器：</label>
-                <select id="server-name" class="form-control">
-                    <option value="s101-tw.ogame.gameforge.com">
-                        Andromeda
-                    </option>
-                    <option value="s115-tw.ogame.gameforge.com">
-                        Orion
-                    </option>
-                    <option value="s116-tw.ogame.gameforge.com">
-                        Pegasus
-                    </option>
-                    <option value="s117-tw.ogame.gameforge.com">
-                        Quantum
-                    </option>
-                    <option value="s118-tw.ogame.gameforge.com">
-                        Rigel
-                    </option>
-                    <option value="s119-tw.ogame.gameforge.com" selected>
-                        Sirius
-                    </option>
-                    <option value="s120-tw.ogame.gameforge.com">
-                        Taurus
-                    </option>
-                    <option value="s121-tw.ogame.gameforge.com">
-                        Ursa
-                    </option>
-                    <option value="s122-tw.ogame.gameforge.com">
-                        Vega
-                    </option>
-                </select>
+                <label asp-for="ServerId">伺服器：</label>
+                <select asp-for="ServerId" asp-items="@(new SelectList(Model.Servers, "Id", "Name"))" class="form-control"></select>
             </div>
             <div class="form-group">
-                <label for="user-name">玩家名稱：</label>
-                <input type="text" class="form-control" id="user-name" value="" />
+                <label asp-for="PlayerName">玩家名稱：</label>
+                <input type="text" asp-for="PlayerName" class="form-control" placeholder="@Model.Servers[5].FeelingLucky" />
             </div>
             <button type="submit" class="btn btn-default" id="player-request">諮詢</button>
         </form>
@@ -60,19 +33,19 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Id)
+                @Html.DisplayNameFor(model => model.Servers[0].Universe.Id)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                @Html.DisplayNameFor(model => model.Servers[0].Universe.Name)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Speed)
+                @Html.DisplayNameFor(model => model.Servers[0].Universe.Speed)
             </th>
             <th>
                 Active / Players
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.LastUpdate)
+                @Html.DisplayNameFor(model => model.Servers[0].Universe.LastUpdate)
             </th>
             <th>
 
@@ -80,26 +53,26 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.Servers)
         {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Id)
+                @Html.DisplayFor(modelItem => item.Universe.Id)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Name)
+                @Html.DisplayFor(modelItem => item.Universe.Name)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Speed) / @Html.DisplayFor(modelItem => item.FleetSpeed)
+                @Html.DisplayFor(modelItem => item.Universe.Speed) / @Html.DisplayFor(modelItem => item.Universe.FleetSpeed)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Players.Count)
+                @Html.DisplayFor(modelItem => item.ActivePlayers) / @Html.DisplayFor(modelItem => item.Universe.Players.Count)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.LastUpdate)
+                @Html.DisplayFor(modelItem => item.Universe.LastUpdate)
             </td>
             <td>
-                <a asp-action="RefreshUniverse" asp-route-id="@item.Id">Refresh</a>
+                <a asp-action="RefreshUniverse" asp-route-id="@item.Universe.Id">Refresh</a>
             </td>
         </tr>
         }
