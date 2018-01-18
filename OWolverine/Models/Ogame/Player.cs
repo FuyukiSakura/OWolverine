@@ -36,13 +36,15 @@ namespace OWolverine.Models.Ogame
                 if (IsAdmin) statusText += "a";
                 if (IsFlee) statusText += "o";
                 if (IsVocation) statusText += "v";
+                if (IsBanned) statusText += "b";
                 if (IsInactive) statusText += "i";
-                if(IsLeft) statusText += "I";
+                if (IsLeft) statusText += "I";
                 return statusText;
             }
             set
             {
                 IsAdmin = value.Contains("a");
+                IsBanned = value.Contains("b");
                 IsVocation = value.Contains("u");
                 IsFlee = value.Contains("o");
                 IsInactive = value.Contains("i");
@@ -71,6 +73,7 @@ namespace OWolverine.Models.Ogame
 
         //Status Property
         public bool IsAdmin { get; set; }
+        public bool IsBanned { get; set; }
         public bool IsFlee { get; set; }
         public bool IsVocation { get; set; }
         public bool IsInactive { get; set; }
@@ -107,6 +110,11 @@ namespace OWolverine.Models.Ogame
             builder.HasMany(e => e.Planets)
                 .WithOne(p => p.Owner)
                 .HasForeignKey(p => p.OwnerId);
+            builder.HasOne(e => e.Alliance)
+                .WithMany(a => a.Members)
+                .HasForeignKey(e => e.AllianceId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
