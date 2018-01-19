@@ -73,12 +73,26 @@ namespace OWolverine.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Search(StarSearchViewModel vm)
         {
-            var sivm = new StarIndexViewModel(await _context.Universes
+            var universeList = await _context.Universes
                 .Include(u => u.Players)
-                .ToArrayAsync());
+                .ToArrayAsync();
+            var sivm = new StarIndexViewModel(universeList);
             sivm.SearchViewModel.PlayerName = vm.PlayerName;
             sivm.SearchViewModel.ServerId = vm.ServerId;
+            //Save server selection
             HttpContext.Session.SetInt32(SessionServerSelection, vm.ServerId);
+
+            //Update Server data if too old
+            var requestedServer = universeList.FirstOrDefault(u => u.Id == vm.ServerId);
+            if(requestedServer != null)
+            {
+                if((DateTime.Now - requestedServer.LastUpdate).Days > 0 || requestedServer.PlanetsLastUpdate == null)
+                {
+                    //Refresh if data is older than 1 day
+                    RefreshUniverse(vm.ServerId);
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 sivm.Players = _context.Universes
