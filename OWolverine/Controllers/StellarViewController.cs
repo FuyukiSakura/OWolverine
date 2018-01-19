@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using OWolverine.Services.Ogame;
 using CSharpUtilities;
 using OWolverine.Models.StarMapViewModels;
+using Microsoft.AspNetCore.Http;
 
 namespace OWolverine.Controllers
 {
@@ -28,6 +29,9 @@ namespace OWolverine.Controllers
         private const string playerAPI = "players.xml";
         private const string universeAPI = "universe.xml";
         private const string playerDataApi = "playerData.xml";
+
+        //Sesssion
+        private const string SessionServerSelection = "_ServerSelection";
 
         /// <summary>
         /// Dependency Injection
@@ -51,9 +55,15 @@ namespace OWolverine.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Index()
         {
-            return View(new StarIndexViewModel(await _context.Universes
+            var vm = new StarIndexViewModel(await _context.Universes
                 .Include(u => u.Players)
-                .ToArrayAsync()));
+                .ToArrayAsync());
+            var lastSelection = HttpContext.Session.GetInt32(SessionServerSelection);
+            if (lastSelection != null)
+            {
+                vm.SearchViewModel.ServerId = (int)lastSelection;
+            }
+            return View(vm);
         }
 
         /// <summary>
@@ -68,6 +78,7 @@ namespace OWolverine.Controllers
                 .ToArrayAsync());
             sivm.SearchViewModel.PlayerName = vm.PlayerName;
             sivm.SearchViewModel.ServerId = vm.ServerId;
+            HttpContext.Session.SetInt32(SessionServerSelection, vm.ServerId);
             if (ModelState.IsValid)
             {
                 sivm.Players = _context.Universes
