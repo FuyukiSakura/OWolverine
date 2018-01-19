@@ -89,13 +89,17 @@ namespace OWolverine.Controllers
             }
 
             var sivm = new StarIndexViewModel(universeList);
-            sivm.SearchViewModel.PlayerName = vm.PlayerName;
-            sivm.SearchViewModel.ServerId = vm.ServerId;
             //Save server selection
             HttpContext.Session.SetInt32(SessionServerSelection, vm.ServerId);
 
             if (ModelState.IsValid)
             {
+                vm.PlayerName = vm.PlayerName ?? ""; //Prevent empty name
+
+                //Return info from request
+                sivm.SearchViewModel.PlayerName = vm.PlayerName;
+                sivm.SearchViewModel.ServerId = vm.ServerId;
+
                 sivm.Players = _context.Universes
                     .Include(u => u.Players)
                         .ThenInclude(player => player.Planets)
@@ -103,7 +107,7 @@ namespace OWolverine.Controllers
                         .AsNoTracking()
                     .First(u => u.Id == vm.ServerId)
                     .Players
-                    .Where(p => p.Name.Contains(vm.PlayerName)).ToList();
+                    .Where(p => p.Name.Contains(vm.PlayerName, StringComparison.OrdinalIgnoreCase)).ToList();
             }
             return View("Index", sivm);
         }
