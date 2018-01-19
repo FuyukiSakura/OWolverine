@@ -66,6 +66,8 @@ namespace OWolverine.Controllers
             var sivm = new StarIndexViewModel(await _context.Universes
                 .Include(u => u.Players)
                 .ToArrayAsync());
+            sivm.SearchViewModel.PlayerName = vm.PlayerName;
+            sivm.SearchViewModel.ServerId = vm.ServerId;
             if (ModelState.IsValid)
             {
                 sivm.Players = _context.Universes
@@ -79,13 +81,14 @@ namespace OWolverine.Controllers
             return View("Index", sivm);
         }
 
-        public async Task<IActionResult> RefreshUniverse(int id)
+        /// <summary>
+        /// Refresh universe data
+        /// </summary>
+        /// <param name="id"></param>
+        private async void RefreshUniverse(int id)
         {
             var universe = _context.Universes.FirstOrDefault(u => u.Id == id);
-            if (universe == null)
-            {
-                return NotFound();
-            }
+            if (universe == null) return;
 
             //Load players into DB
             var playersData = OgameApi.GetAllPlayers(id);
@@ -207,7 +210,6 @@ namespace OWolverine.Controllers
             }
             universe.LastUpdate = DateTime.Now;
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
