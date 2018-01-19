@@ -106,8 +106,7 @@ namespace OWolverine.Controllers
                     }
                 }
                 //Remove players no longer exists
-                _context.Players.RemoveRange(_context.Players.Where(
-                    e => !playerList.Any(p => e.Id == p.Id)));
+                universe.Players.RemoveAll(e => !playerList.Any(p => e.Id == p.Id));
                 _context.AddRange(playerList.Where(p => p.Id == 0)); //Add new players
                 universe.PlayersLastUpdate = playersLastUpdate; //Update API Date
                 await _context.SaveChangesAsync();
@@ -150,8 +149,7 @@ namespace OWolverine.Controllers
                     }
                 });
                 //Remove alliances no longer exists
-                _context.Alliances.RemoveRange(_context.Alliances.Where(
-                    e => !allianceList.Any(a => a.Id == e.Id)));
+                universe.Alliances.RemoveAll(e => !allianceList.Any(a => a.Id == e.Id));
                 _context.AddRange(allianceList.Where(a => a.Id == 0)); //Add new alliances
                 universe.AllianceLastUpdate = alliancesLastUpdate; //Update API Date
                 await _context.SaveChangesAsync();
@@ -191,8 +189,7 @@ namespace OWolverine.Controllers
                 planetList.RemoveAll(p => removePlanetList.Contains(p));
 
                 //Remove planets no longer exists
-                _context.RemoveRange(_context.Planets.Where(
-                    e => !planetList.Any(p => e.Id == p.Id)));
+                universe.Planets.RemoveAll(e => !planetList.Any(p => e.Id == p.Id));
                 _context.AddRange(planetList.Where(p => p.Id == 0));
                 universe.PlanetsLastUpdate = planetLastUpdate;
             }
