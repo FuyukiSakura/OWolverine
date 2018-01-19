@@ -58,7 +58,10 @@
                 @Html.DisplayNameFor(model => model.Servers[0].Universe.Speed)
             </th>
             <th>
-                Active / Players
+                @Html.DisplayNameFor(model => model.Servers[0].ActivePlayers) / @Html.DisplayNameFor(model => model.Servers[0].Universe.Players)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Servers[0].MapUpdateDay)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Servers[0].LastUpdate)
@@ -68,23 +71,26 @@
     <tbody>
         @foreach (var item in Model.Servers)
         {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Id)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Universe.Speed) / @Html.DisplayFor(modelItem => item.Universe.FleetSpeed)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ActivePlayers) / @Html.DisplayFor(modelItem => item.Universe.Players.Count)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.LastUpdate)
-                </td>
-            </tr>
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Universe.Speed) / @Html.DisplayFor(modelItem => item.Universe.FleetSpeed)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ActivePlayers) / @Html.DisplayFor(modelItem => item.Universe.Players.Count)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MapUpdateDay)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastUpdate)
+            </td>
+        </tr>
         }
     </tbody>
 </table>

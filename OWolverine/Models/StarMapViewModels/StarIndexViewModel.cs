@@ -59,7 +59,10 @@ namespace OWolverine.Models.StarMapViewModels
         [Display(Name = "Server ID")]
         public int Id => Universe.Id;
         public string Name => Universe.Name;
+        [Display(Name = "Active")]
         public int ActivePlayers => Universe.Players.Where(p => p.IsActive).Count();
+        [Display(Name = "Map update date")]
+        public string MapUpdateDay => Universe.PlanetsLastUpdate == null ? "" : ((DateTime)Universe.PlanetsLastUpdate).ToString("ddd");
         [Display(Name = "Last Update")]
         public DateTime? LastUpdate => DateTimeHelper.GetLatestDate(ServerDates);
     }
