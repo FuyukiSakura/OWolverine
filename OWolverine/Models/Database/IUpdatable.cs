@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace OWolverine.Models.StellarView
+namespace OWolverine.Models.Database
 {
-    public class Universe
+    public interface IUpdatable
     {
-        public string Herf;
+        void Update(IUpdatable obj);
     }
 }
