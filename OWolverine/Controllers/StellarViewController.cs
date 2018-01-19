@@ -94,20 +94,23 @@ namespace OWolverine.Controllers
             if (playersLastUpdate != universe.PlayersLastUpdate)
             {
                 //Only update if the API Date is different
-                foreach (var player in playerList)
+                var removeList = new List<Player>();
+                foreach(var player in universe.Players)
                 {
-                    var dbItem = _context.Players.FirstOrDefault(e => e.PlayerId == player.PlayerId && e.ServerId == player.ServerId);
-                    if (dbItem != null)
-                    { 
-                        //Assign ID if exists in database
-                        player.Id = dbItem.Id;
-                        //Update the context
-                        dbItem.Update(player);
+                    var pNew = playerList.FirstOrDefault(p => p.PlayerId == player.PlayerId);
+                    if(pNew == null)
+                    {
+                        //Remove player if not found in API
+                        removeList.Add(player);
+                    }
+                    else
+                    {
+                        player.Update(pNew);
+                        playerList.Remove(pNew); //Remove from list after update
                     }
                 }
-                //Remove players no longer exists
-                universe.Players.RemoveAll(e => !playerList.Any(p => e.Id == p.Id));
-                _context.AddRange(playerList.Where(p => p.Id == 0)); //Add new players
+                _context.RemoveRange(removeList);
+                _context.AddRange(playerList);
                 universe.PlayersLastUpdate = playersLastUpdate; //Update API Date
                 await _context.SaveChangesAsync();
             }
@@ -122,7 +125,7 @@ namespace OWolverine.Controllers
                 allianceList.ForEach(a =>
                 {
                     var dbItem = _context.Alliances.FirstOrDefault(e => e.AllianceId == a.AllianceId && e.ServerId == a.ServerId);
-                    a.Founder = _context.Players.FirstOrDefault(p => p.PlayerId == a.FounderId && p.ServerId == a.ServerId);
+                    a.Founder = universe.Players.FirstOrDefault(p => p.PlayerId == a.FounderId);
                     if (a.Founder == null)
                     {
                         //Unset founder ID if founder not found
@@ -137,7 +140,7 @@ namespace OWolverine.Controllers
                     for (var i = 0; i < a.Members.Count; i++)
                     {
                         //Replace member placeholder with database object
-                        a.Members[i] = _context.Players.FirstOrDefault(p => p.PlayerId == a.Members[i].PlayerId && p.ServerId == a.Members[i].ServerId);
+                        a.Members[i] = universe.Players.FirstOrDefault(p => p.PlayerId == a.Members[i].PlayerId);
                     }
 
                     if (dbItem != null)
@@ -163,19 +166,29 @@ namespace OWolverine.Controllers
             if (planetLastUpdate != universe.PlanetsLastUpdate)
             {
                 //Only update if the API Date is different
+                //Update existing planets
+                var removeList = new List<Planet>();
+                foreach(var planet in universe.Planets)
+                {
+                    var pNew = planetList.FirstOrDefault(p => p.PlanetId == planet.PlanetId && p.ServerId == planet.ServerId);
+                    if (pNew == null)
+                    {
+                        //Remove if not exists in API
+                        removeList.Add(planet);
+                    }
+                    else
+                    {
+                        planet.Update(pNew);
+                        planetList.Remove(pNew); //Remove updated item
+                    }
+                }
+                _context.RemoveRange(removeList);
+                await _context.SaveChangesAsync();
+
                 planetList.ForEach(p =>
                 {
-                    var dbItem = _context.Planets.FirstOrDefault(e => e.PlanetId == p.PlanetId && e.ServerId == p.ServerId);
-                    if(dbItem != null)
-                    {
-                        //Assign ID if exists in database
-                        p.Id = dbItem.Id;
-                        //Update the context
-                        p.Update(dbItem);
-                    }
-
                     //Assign real owner ID
-                    var owner = _context.Players.FirstOrDefault(e => e.PlayerId == p.OwnerId && e.ServerId == p.ServerId);
+                    var owner = universe.Players.FirstOrDefault(e => e.PlayerId == p.OwnerId);
                     if (owner == null) {
                         //Player removed planet no longer exists
                         removePlanetList.Add(p);
@@ -189,8 +202,7 @@ namespace OWolverine.Controllers
                 planetList.RemoveAll(p => removePlanetList.Contains(p));
 
                 //Remove planets no longer exists
-                universe.Planets.RemoveAll(e => !planetList.Any(p => e.Id == p.Id));
-                _context.AddRange(planetList.Where(p => p.Id == 0));
+                _context.AddRange(planetList);
                 universe.PlanetsLastUpdate = planetLastUpdate;
             }
             universe.LastUpdate = DateTime.Now;
