@@ -35,6 +35,7 @@ namespace OWolverine.Models.Ogame
         [NotMapped]
         public Coordinate Coords { get; set; } = new Coordinate();
         [XmlAttribute("coords")]
+        [Display(Name = "Coordinates")]
         public string Coord {
             get {
                 return String.Format("{0}:{1}:{2}", Coords.Galaxy, Coords.System, Coords.Location);

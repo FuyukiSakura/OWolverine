@@ -15,7 +15,7 @@ using OWolverine.Data;
 using Microsoft.EntityFrameworkCore;
 using OWolverine.Services.Ogame;
 using CSharpUtilities;
-using OWolverine.Models.StellaViewViewModels;
+using OWolverine.Models.StarMapViewModels;
 
 namespace OWolverine.Controllers
 {
@@ -51,21 +51,9 @@ namespace OWolverine.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Index()
         {
-            var vm = new StarMapSearchViewModel();
-            var servers = await _context.Universes
+            return View(new StarIndexViewModel(await _context.Universes
                 .Include(u => u.Players)
-                .ToListAsync();
-            foreach (var u in servers)
-            {
-                var tryResult = u.Players.Where(e => e.IsActive).OrderBy(r => Guid.NewGuid()).Take(1).ToArray();
-                var playerName = "";
-                if (tryResult.Any())
-                {
-                     playerName = tryResult[0].Name;
-                }
-                vm.Servers.Add(new UniverseViewModel(u, playerName));
-            }
-            return View(vm);
+                .ToArrayAsync()));
         }
 
         /// <summary>
@@ -73,17 +61,22 @@ namespace OWolverine.Controllers
         /// </summary>
         /// <param name="vm"></param>
         /// <returns></returns>
-        public IActionResult Search(StarMapSearchViewModel vm)
+        public async Task<IActionResult> Search(StarSearchViewModel vm)
         {
+            var sivm = new StarIndexViewModel(await _context.Universes
+                .Include(u => u.Players)
+                .ToArrayAsync());
             if (ModelState.IsValid)
             {
-                vm.Players = _context.Universes
+                sivm.Players = _context.Universes
                     .Include(u => u.Players)
+                        .ThenInclude(player => player.Planets)
+                        .ThenInclude(planet => planet.Moon)
                     .First(u => u.Id == vm.ServerId)
                     .Players
                     .Where(p => p.Name.Contains(vm.PlayerName)).ToList();
             }
-            return View("Index", vm);
+            return View("Index", sivm);
         }
 
         public async Task<IActionResult> RefreshUniverse(int id)
