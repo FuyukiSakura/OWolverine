@@ -102,6 +102,8 @@ namespace OWolverine.Controllers
 
                 sivm.Players = _context.Universes
                     .Include(u => u.Players)
+                        .ThenInclude(p => p.Alliance)
+                    .Include(u => u.Players)
                         .ThenInclude(player => player.Planets)
                         .ThenInclude(planet => planet.Moon)
                         .AsNoTracking()
