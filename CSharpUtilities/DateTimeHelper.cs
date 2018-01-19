@@ -18,5 +18,17 @@ namespace CSharpUtilities
             dtDateTime = dtDateTime.AddSeconds(unixTimeStamp).ToLocalTime();
             return dtDateTime;
         }
+
+        public static DateTime? GetLatestDate(List<DateTime> dates)
+        {
+            DateTime max = DateTime.MinValue; // Start with the lowest value possible...
+            foreach (DateTime date in dates)
+            {
+                if (DateTime.Compare(date, max) == 1)
+                    max = date;
+            }
+            if (max == DateTime.MinValue) return null;
+            return max;
+        }
     }
 }

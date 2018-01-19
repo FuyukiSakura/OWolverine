@@ -1,4 +1,5 @@
-﻿using OWolverine.Models.Ogame;
+﻿using CSharpUtilities;
+using OWolverine.Models.Ogame;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -45,14 +46,21 @@ namespace OWolverine.Models.StarMapViewModels
     {
         public Universe Universe { get; set; }
         public string FeelingLucky { get; set; }
+        private List<DateTime> ServerDates { get; set; } = new List<DateTime>();
         public UniverseViewModel(Universe server, string playerName)
         {
             Universe = server;
             FeelingLucky = playerName;
+            if (server.PlayersLastUpdate != null) ServerDates.Add((DateTime)server.PlayersLastUpdate);
+            if (server.AllianceLastUpdate != null) ServerDates.Add((DateTime)server.AllianceLastUpdate);
+            if (server.PlanetsLastUpdate != null) ServerDates.Add((DateTime)server.PlanetsLastUpdate);
         }
 
+        [Display(Name = "Server ID")]
         public int Id => Universe.Id;
         public string Name => Universe.Name;
         public int ActivePlayers => Universe.Players.Where(p => p.IsActive).Count();
+        [Display(Name = "Last Update")]
+        public DateTime? LastUpdate => DateTimeHelper.GetLatestDate(ServerDates);
     }
 }
