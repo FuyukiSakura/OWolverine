@@ -71,6 +71,7 @@ namespace OWolverine.Controllers
         /// </summary>
         /// <param name="vm"></param>
         /// <returns></returns>
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Search(StarSearchViewModel vm)
         {
             var universeList = await _context.Universes
