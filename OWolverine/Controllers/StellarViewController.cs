@@ -214,7 +214,7 @@ namespace OWolverine.Controllers
                 var removeList = new List<Planet>();
                 foreach(var planet in universe.Planets)
                 {
-                    var pNew = planetList.FirstOrDefault(p => p.PlanetId == planet.PlanetId && p.ServerId == planet.ServerId);
+                    var pNew = planetList.FirstOrDefault(p => p.PlanetId == planet.PlanetId);
                     if (pNew == null)
                     {
                         //Remove if not exists in API
