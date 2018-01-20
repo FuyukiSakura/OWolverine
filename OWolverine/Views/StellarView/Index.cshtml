@@ -11,7 +11,7 @@
 <hr />
 <div class="row">
     <div class="col-xs-12">
-        <span style="color:red">@(Model.Players.Count <= 0 ? "Player not found" : "")</span>
+        <span style="color:red">@(Model.Players.Count <= 0 && Context.Request.HttpContext.Request.Method == "POST" ? "Player not found" : "")</span>
     </div>
 </div>
 <!-- Server status -->
