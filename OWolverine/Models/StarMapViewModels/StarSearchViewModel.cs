@@ -17,8 +17,6 @@ namespace OWolverine.Models.StarMapViewModels
         public string Alliance { get; set; }
         [Display(Name = "Player Status: ")]
         public PlayerStatusViewModel PlayerStatus { get; set; }
-        [Display(Name = "Show raw Planet list")]
-        public bool ShowPlanetList { get; set; }
         [Display(Name = "Location")]
         public Coordinate Coords { get; set; }
         [Display(Name = "Range (+/-): ")]
