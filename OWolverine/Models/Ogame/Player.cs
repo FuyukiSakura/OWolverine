@@ -33,12 +33,12 @@ namespace OWolverine.Models.Ogame
             get
             {
                 string statusText = "";
-                if (IsAdmin) statusText += "a";
-                if (IsFlee) statusText += "o";
-                if (IsVocation) statusText += "v";
-                if (IsBanned) statusText += "b";
-                if (IsInactive && !IsLeft) statusText += "i";
-                if (IsLeft) statusText += "I";
+                if (IsAdmin) statusText += "a ";
+                if (IsFlee) statusText += "o ";
+                if (IsVocation) statusText += "v ";
+                if (IsBanned) statusText += "b ";
+                if (IsInactive && !IsLeft) statusText += "i ";
+                if (IsLeft) statusText += "I ";
                 return statusText;
             }
             set

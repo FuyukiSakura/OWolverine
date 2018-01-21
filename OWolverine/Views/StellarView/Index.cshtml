@@ -16,6 +16,8 @@
 </div>
 
 <!-- Planet List -->
+@if (Model.Planets.Any())
+{
 <table class="table">
     <thead>
         <tr>
@@ -26,10 +28,13 @@
                 @Html.DisplayNameFor(model => model.Planets[0].Name)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Players[0].Name)
+                @Html.DisplayNameFor(model => model.Planets[0].Moon)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Planets[0].Moon)
+                Player
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Players[0].Alliance)
             </th>
         </tr>
     </thead>
@@ -43,25 +48,29 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
-            <th>
-                @Html.DisplayFor(modelItem => item.Owner.Name)
-            </th>
             <td>
                 @Html.DisplayFor(modelItem => item.Moon.Name)
+            </td>
+            <td>
+                <a href="#player-@item.OwnerId">@Html.DisplayFor(modelItem => item.Owner.Name)</a>
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Owner.Alliance.Tag) - @Html.DisplayFor(modelItem => item.Owner.Alliance.Name)
             </td>
         </tr>
         }
     </tbody>
 </table>
+}
 
 <!-- Player List -->
 @foreach (var player in Model.Players)
 {
-    <div class="panel-group">
+    <div class="panel-group" id="player-@player.Id">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#collapse-@player.Id">@player.Name</a>
+                    <a data-toggle="collapse" href="#collapse-@player.Id">@player.Name @(player.Status == "" ? "" : "(Status:"+player.Status+")")</a>
                 </h4>
             </div>
             <div id="collapse-@player.Id" class="panel-collapse @(Model.Players.Count <= 3 ? "" : "collapse")">
