@@ -3,15 +3,37 @@
 <div class="row">
     <div class="col-md-12">
         <form asp-action="Search" class="form-inline" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="ServerId">Server</label>
+                <label asp-for="ServerId"></label>
                 <select asp-for="ServerId" asp-items="@(new SelectList(Model.Servers, "Id", "Name"))" class="form-control"></select>
+                <span asp-validation-for="ServerId" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="PlayerName">Player Name</label>
+                <label asp-for="PlayerName"></label>
                 <input asp-for="PlayerName" class="form-control" placeholder="" value="@Model.PlayerName" />
             </div>
             <button type="submit" class="btn btn-default" id="player-request">諮詢</button>
+            <div id="div--advance-search">
+                <a href="#" data-toggle="collapse" data-target="#advance-search">Advance [+]</a>
+                <div id="advance-search" class="collapse">
+                    <div class="form-group">
+                        <label asp-for="PlayerStatus"></label>
+                        <label class="checkbox-inline">
+                            <input asp-for="PlayerStatus.IsBanned" /> @Html.DisplayNameFor(model => model.PlayerStatus.IsBanned)
+                        </label>
+                        <label class="checkbox-inline">
+                            <input asp-for="PlayerStatus.IsFlee" /> @Html.DisplayNameFor(model => model.PlayerStatus.IsFlee)
+                        </label>
+                        <label class="checkbox-inline">
+                            <input asp-for="PlayerStatus.IsInactive" /> @Html.DisplayNameFor(model => model.PlayerStatus.IsInactive)
+                        </label>
+                        <label class="checkbox-inline">
+                            <input asp-for="PlayerStatus.IsLeft" /> @Html.DisplayNameFor(model => model.PlayerStatus.IsLeft)
+                        </label>
+                    </div>
+                </div>
+            </div>
         </form>
     </div>
 </div>

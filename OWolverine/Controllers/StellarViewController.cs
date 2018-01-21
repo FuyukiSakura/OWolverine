@@ -74,10 +74,10 @@ namespace OWolverine.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Search(StarSearchViewModel vm)
         {
-            var universeList = await _context.Universes
+            var universeList = _context.Universes
                 .Include(u => u.Players)
-                .AsNoTracking()
-                .ToArrayAsync();
+                .AsNoTracking();
+
             //Update Server data if too old
             var requestedServer = universeList.FirstOrDefault(u => u.Id == vm.ServerId);
             if (requestedServer != null)
@@ -89,10 +89,11 @@ namespace OWolverine.Controllers
                 }
             }
 
-            var sivm = new StarIndexViewModel(universeList);
+            var sivm = new StarIndexViewModel(await universeList.ToArrayAsync());
             //Save server selection
             HttpContext.Session.SetInt32(SessionServerSelection, vm.ServerId);
 
+            //Start searching
             if (ModelState.IsValid)
             {
                 vm.PlayerName = vm.PlayerName ?? ""; //Prevent empty name
@@ -100,17 +101,37 @@ namespace OWolverine.Controllers
                 //Return info from request
                 sivm.SearchViewModel.PlayerName = vm.PlayerName;
                 sivm.SearchViewModel.ServerId = vm.ServerId;
-
-                sivm.Players = _context.Universes
+                sivm.SearchViewModel.Coords = vm.Coords;
+                var players = _context.Universes
                     .Include(u => u.Players)
                         .ThenInclude(p => p.Alliance)
                     .Include(u => u.Players)
                         .ThenInclude(player => player.Planets)
                         .ThenInclude(planet => planet.Moon)
-                        .AsNoTracking()
+                    .AsNoTracking()
                     .First(u => u.Id == vm.ServerId)
                     .Players
                     .Where(p => p.Name.Contains(vm.PlayerName, StringComparison.OrdinalIgnoreCase)).ToList();
+                
+                //Status filter
+                if (vm.PlayerStatus.IsBanned)
+                {
+                    players.RemoveAll(p => !p.IsBanned);
+                }
+                if (vm.PlayerStatus.IsFlee)
+                {
+                    players.RemoveAll(p => !p.IsFlee);
+                }
+                if (vm.PlayerStatus.IsInactive)
+                {
+                    players.RemoveAll(p => !p.IsInactive);
+                }
+                if (vm.PlayerStatus.IsLeft)
+                {
+                    players.RemoveAll(p => !p.IsLeft);
+                }
+                sivm.Players = players;
+                sivm.IsSearch = true;
             }
             return View("Index", sivm);
         }
