@@ -33,12 +33,12 @@ namespace OWolverine.Models.Ogame
             get
             {
                 string statusText = "";
-                if (IsAdmin) statusText += "a";
-                if (IsFlee) statusText += "o";
-                if (IsVocation) statusText += "v";
-                if (IsBanned) statusText += "b";
-                if (IsInactive) statusText += "i";
-                if (IsLeft) statusText += "I";
+                if (IsAdmin) statusText += "a ";
+                if (IsFlee) statusText += "o ";
+                if (IsVocation) statusText += "v ";
+                if (IsBanned) statusText += "b ";
+                if (IsInactive && !IsLeft) statusText += "i ";
+                if (IsLeft) statusText += "I ";
                 return statusText;
             }
             set
@@ -47,7 +47,7 @@ namespace OWolverine.Models.Ogame
                 IsBanned = value.Contains("b");
                 IsVocation = value.Contains("u");
                 IsFlee = value.Contains("o");
-                IsInactive = value.Contains("i");
+                IsInactive = value.Contains("i") || value.Contains("I");
                 IsLeft = value.Contains("I");
             }
         }

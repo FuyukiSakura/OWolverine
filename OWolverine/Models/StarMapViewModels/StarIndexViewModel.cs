@@ -16,8 +16,9 @@ namespace OWolverine.Models.StarMapViewModels
 
         //Display Elements
         public List<Player> Players { get; set; } = new List<Player>();
+        public List<Planet> Planets { get; set; } = new List<Planet>();
         public List<UniverseViewModel> Servers { get; set; } = new List<UniverseViewModel>();
-
+        public bool IsSearch { get; set; }
         public StarIndexViewModel(Universe[] universe)
         {
             //Init SearchViewModel
@@ -42,6 +43,9 @@ namespace OWolverine.Models.StarMapViewModels
         }
     }
 
+    /// <summary>
+    /// Universe ASP displayable format
+    /// </summary>
     public class UniverseViewModel
     {
         public Universe Universe { get; set; }
@@ -65,5 +69,20 @@ namespace OWolverine.Models.StarMapViewModels
         public string MapUpdateDay => Universe.PlanetsLastUpdate == null ? "" : ((DateTime)Universe.PlanetsLastUpdate).ToString("ddd");
         [Display(Name = "Last Update")]
         public DateTime? LastUpdate => DateTimeHelper.GetLatestDate(ServerDates);
+    }
+
+    /// <summary>
+    /// Player status ASP displayable format
+    /// </summary>
+    public class PlayerStatusViewModel
+    {
+        [Display(Name = "g")]
+        public bool IsBanned { get; set; }
+        [Display(Name = "o")]
+        public bool IsFlee { get; set; }
+        [Display(Name = "i")]
+        public bool IsInactive { get; set; }
+        [Display(Name = "I")]
+        public bool IsLeft { get; set; }
     }
 }

@@ -4,27 +4,81 @@
     ViewData["Title"] = "Stellar View";
 }
 
-<h1>星圖</h1>
+<h1>Stellar View</h1>
 @{
     Html.RenderPartial("SearchFormView", Model.SearchViewModel);
 }
 <hr />
-<div class="row">
-    <div class="col-xs-12">
-        <span style="color:red">@(Model.Players.Count <= 0 ? "Player not found" : "")</span>
+@if (Model.IsSearch && Model.Players.Count <= 0)
+{
+    <div class="row">
+        <div class="col-xs-12">
+            <span style="color:red">Player with criteria not found.</span>
+        </div>
     </div>
-</div>
-<!-- Server status -->
+}
+
+<!-- Planet List -->
+@if (Model.Planets.Any())
+{
+    <h4>Results: @Model.Planets.Count</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Planets[0].Coord)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Planets[0].Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Planets[0].Moon)
+                </th>
+                <th>
+                    Player
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Players[0].Alliance)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Planets)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Coord)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Moon.Name)
+                    </td>
+                    <td>
+                        <a href="#player-@item.OwnerId">@Html.DisplayFor(modelItem => item.Owner.Name)</a>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Owner.Alliance.Tag) - @Html.DisplayFor(modelItem => item.Owner.Alliance.Name)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<!-- Player List -->
+<h4>Results: @Model.Players.Count</h4>
 @foreach (var player in Model.Players)
 {
-    <div class="panel-group">
+    <div class="panel-group" id="player-@player.Id">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#collapse-@player.Id">@player.Name</a>
+                    <a data-toggle="collapse" href="#collapse-@player.Id">@player.Name @(player.Status == "" ? "" : "(Status: " + player.Status + ")")</a>
                 </h4>
             </div>
-            <div id="collapse-@player.Id" class="panel-collapse @(Model.Players.Count <= 3 ? "" : "collapse")">
+            <div id="collapse-@player.Id" class="panel-collapse @(Model.Players.Count == 1 ? "" : "collapse")">
                 <div class="panel-body">
                     <table class="table">
                         <thead>
@@ -65,52 +119,55 @@
 }
 
 <!-- Server status -->
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Servers[0].Id)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Servers[0].Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Servers[0].Universe.Speed)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Servers[0].ActivePlayers) / @Html.DisplayNameFor(model => model.Servers[0].Universe.Players)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Servers[0].MapUpdateDay)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Servers[0].LastUpdate)
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.Servers)
-        {
+@if (!Model.IsSearch)
+{
+    <table class="table">
+        <thead>
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Id)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Universe.Speed) / @Html.DisplayFor(modelItem => item.Universe.FleetSpeed)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ActivePlayers) / @Html.DisplayFor(modelItem => item.Universe.Players.Count)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.MapUpdateDay)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.LastUpdate)
-                </td>
+                <th>
+                    @Html.DisplayNameFor(model => model.Servers[0].Id)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Servers[0].Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Servers[0].Universe.Speed)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Servers[0].ActivePlayers) / @Html.DisplayNameFor(model => model.Servers[0].Universe.Players)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Servers[0].MapUpdateDay)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Servers[0].LastUpdate)
+                </th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Servers)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Id)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Universe.Speed) / @Html.DisplayFor(modelItem => item.Universe.FleetSpeed)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ActivePlayers) / @Html.DisplayFor(modelItem => item.Universe.Players.Count)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.MapUpdateDay)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.LastUpdate)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
