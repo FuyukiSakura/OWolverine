@@ -32,6 +32,26 @@
                             <input asp-for="PlayerStatus.IsLeft" /> @Html.DisplayNameFor(model => model.PlayerStatus.IsLeft)
                         </label>
                     </div>
+                    <br />
+                    <div class="form-group">
+                        <label asp-for="Coords"></label>
+                        <input asp-for="Coords.Galaxy" class="form-control location-input" max="9" min="0" /> :
+                        <input asp-for="Coords.System" class="form-control location-input" max="499" min="0" /> :
+                        <input asp-for="Coords.Location" class="form-control location-input" max="15" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Range"></label>
+                        <input asp-for="Range" class="form-control location-input" max="499" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="MoonLevel"></label>
+                        <input asp-for="MoonLevel" class="form-control location-input" min="0" />
+                    </div>
+                    <br />
+                    <div class="form-group">
+                        <label asp-for="ShowPlanetList"></label>
+                        <input asp-for="ShowPlanetList" />
+                    </div>
                 </div>
             </div>
         </form>

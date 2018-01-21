@@ -96,24 +96,28 @@ namespace OWolverine.Controllers
             //Start searching
             if (ModelState.IsValid)
             {
+                //Clean up
                 vm.PlayerName = vm.PlayerName ?? ""; //Prevent empty name
 
                 //Return info from request
                 sivm.SearchViewModel.PlayerName = vm.PlayerName;
                 sivm.SearchViewModel.ServerId = vm.ServerId;
                 sivm.SearchViewModel.Coords = vm.Coords;
-                var players = _context.Universes
+
+                var universe = _context.Universes
                     .Include(u => u.Players)
                         .ThenInclude(p => p.Alliance)
                     .Include(u => u.Players)
                         .ThenInclude(player => player.Planets)
                         .ThenInclude(planet => planet.Moon)
+                    .Include(u => u.Planets)
                     .AsNoTracking()
-                    .First(u => u.Id == vm.ServerId)
+                    .First(u => u.Id == vm.ServerId);
+                var players = universe
                     .Players
-                    .Where(p => p.Name.Contains(vm.PlayerName, StringComparison.OrdinalIgnoreCase)).ToList();
+                    .Where(e => e.Name.Contains(vm.PlayerName, StringComparison.OrdinalIgnoreCase)).ToList();
                 
-                //Status filter
+                // ----- Status filter
                 if (vm.PlayerStatus.IsBanned)
                 {
                     players.RemoveAll(p => !p.IsBanned);
@@ -130,6 +134,31 @@ namespace OWolverine.Controllers
                 {
                     players.RemoveAll(p => !p.IsLeft);
                 }
+
+                // ----- Planet search
+                if (!vm.Coords.IsEmpty)
+                {
+                    var requestedCoords = vm.Coords;
+                    var planets = universe.Planets.Where(e =>
+                        (requestedCoords.Galaxy == 0 || e.Coords.Galaxy == requestedCoords.Galaxy) &&
+                        (requestedCoords.System == 0 || 
+                            e.Coords.System == requestedCoords.System ||  
+                            e.Coords.System >= (requestedCoords.System - vm.Range) && 
+                            e.Coords.System <= (requestedCoords.System + vm.Range)
+                            ) &&
+                        (requestedCoords.Location == 0 || e.Coords.Location == requestedCoords.Location)
+                    ).OrderBy(e => e.Coords.Galaxy)
+                    .OrderBy(e => e.Coords.System)
+                    .OrderBy(e => e.Coords.Location).ToList();
+
+                    //Remove all planets that are not owned by a player
+                    planets.RemoveAll(e => !players.Contains(e.Owner));
+
+                    //Remove all players that does not own a planet in the range
+                    players.RemoveAll(e => !e.Planets.Where(p => planets.Contains(p)).Any());
+                    sivm.Planets = planets;
+                }
+
                 sivm.Players = players;
                 sivm.IsSearch = true;
             }

@@ -16,7 +16,7 @@ namespace OWolverine.Models.StarMapViewModels
 
         //Display Elements
         public List<Player> Players { get; set; } = new List<Player>();
-        public List<Planet> Planets { get; set; }
+        public List<Planet> Planets { get; set; } = new List<Planet>();
         public List<UniverseViewModel> Servers { get; set; } = new List<UniverseViewModel>();
         public bool IsSearch { get; set; }
         public StarIndexViewModel(Universe[] universe)

@@ -11,10 +11,50 @@
 <hr />
 <div class="row">
     <div class="col-xs-12">
-        <span style="color:red">@(Model.Players.Count <= 0 && Context.Request.HttpContext.Request.Method == "POST" ? "Player with criteria not found" : "")</span>
+        <span style="color:red">@(Model.IsSearch && Model.Players.Count <= 0 ? "Player with criteria not found." : "")</span>
     </div>
 </div>
-<!-- Server status -->
+
+<!-- Planet List -->
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Planets[0].Coord)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Planets[0].Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Players[0].Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Planets[0].Moon)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Planets)
+        {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Coord)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <th>
+                @Html.DisplayFor(modelItem => item.Owner.Name)
+            </th>
+            <td>
+                @Html.DisplayFor(modelItem => item.Moon.Name)
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Player List -->
 @foreach (var player in Model.Players)
 {
     <div class="panel-group">
