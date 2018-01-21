@@ -77,18 +77,6 @@ namespace OWolverine.Controllers
             var universeList = _context.Universes
                 .Include(u => u.Players)
                 .AsNoTracking();
-
-            //Update Server data if too old
-            var requestedServer = universeList.FirstOrDefault(u => u.Id == vm.ServerId);
-            if (requestedServer != null)
-            {
-                if ((DateTime.Now - requestedServer.LastUpdate).Days > 0 || requestedServer.PlanetsLastUpdate == null)
-                {
-                    //Refresh if data is older than 1 day
-                    await RefreshUniverse(vm.ServerId);
-                }
-            }
-
             var sivm = new StarIndexViewModel(await universeList.ToArrayAsync());
             //Save server selection
             HttpContext.Session.SetInt32(SessionServerSelection, vm.ServerId);
@@ -206,7 +194,7 @@ namespace OWolverine.Controllers
         /// Refresh universe data
         /// </summary>
         /// <param name="id"></param>
-        private async Task RefreshUniverse(int id)
+        public async Task<IActionResult> RefreshUniverse(int id)
         {
             var universe = _context.Universes
                 .Include(u => u.Players)
@@ -214,7 +202,7 @@ namespace OWolverine.Controllers
                     .ThenInclude(a => a.Members)
                 .Include(u => u.Planets)
                 .FirstOrDefault(u => u.Id == id);
-            if (universe == null) return;
+            if (universe == null) return NotFound();
 
             //Load players into DB
             var playersData = OgameApi.GetAllPlayers(id);
@@ -335,6 +323,7 @@ namespace OWolverine.Controllers
             }
             universe.LastUpdate = DateTime.Now;
             await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
