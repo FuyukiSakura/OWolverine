@@ -70,7 +70,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#collapse-@player.Id">@player.Name @(player.Status == "" ? "" : "(Status:"+player.Status+")")</a>
+                    <a data-toggle="collapse" href="#collapse-@player.Id">@player.Name @(player.Status == "" ? "" : "(Status: "+player.Status+")")</a>
                 </h4>
             </div>
             <div id="collapse-@player.Id" class="panel-collapse @(Model.Players.Count <= 3 ? "" : "collapse")">
@@ -114,6 +114,7 @@
 }
 
 <!-- Server status -->
+@if(!Model.IsSearch){
 <table class="table">
     <thead>
         <tr>
@@ -163,3 +164,4 @@
         }
     </tbody>
 </table>
+}
