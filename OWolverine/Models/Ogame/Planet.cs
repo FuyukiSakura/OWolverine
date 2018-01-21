@@ -75,6 +75,12 @@ namespace OWolverine.Models.Ogame
         public int Location { get; set; }
         [NotMapped]
         public bool IsEmpty => Galaxy == 0 && System == 0 && Location == 0;
+        [NotMapped]
+        public bool IsAddress => Galaxy != 0 && System != 0 && Location != 0;
+        public bool IsEqual(Coordinate coord)
+        {
+            return Galaxy == coord.Galaxy && System == coord.System && Location == coord.Location;
+        }
     }
 
     public class PlanetConfiguration : IEntityTypeConfiguration<Planet>
