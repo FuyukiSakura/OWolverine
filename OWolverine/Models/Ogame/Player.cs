@@ -100,8 +100,15 @@ namespace OWolverine.Models.Ogame
         {
             if(obj is Player player)
             {
-                Name = player.Name;
-                Status = player.Status;
+                if (Name != player.Name)
+                {
+                    Name = player.Name;
+                }
+
+                if (Status != player.Status)
+                {
+                    Status = player.Status;
+                }
             }
         }
     }
