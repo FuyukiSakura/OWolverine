@@ -65,9 +65,9 @@ namespace OWolverine.Models.Ogame
         {
             if(obj is Alliance alliance)
             {
-                FounderId = alliance.FounderId;
-                Name = alliance.Name;
-                Tag = alliance.Tag;
+                if(FounderId != alliance.FounderId) FounderId = alliance.FounderId;
+                if(Name != alliance.Name) Name = alliance.Name;
+                if(Tag != alliance.Tag) Tag = alliance.Tag;
                 //Remove members that have left
                 Members.RemoveAll(e => !alliance.Members.Any(a => a.Id == e.Id));
                 //Add new members

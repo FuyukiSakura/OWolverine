@@ -61,9 +61,13 @@ namespace OWolverine.Models.Ogame
         {
             if(obj is Planet planet)
             {
-                Name = planet.Name;
-                if (Moon == null) Moon = new Moon(); //Create new moon if not exists
-                Moon.Update(planet.Moon);
+                if(Name != planet.Name) Name = planet.Name;
+                if (Moon == null && planet.Moon != null)
+                {
+                    //Create new moon if not exists
+                    Moon = new Moon();
+                    Moon.Update(planet.Moon);
+                }
             }
         }
     }
@@ -107,8 +111,8 @@ namespace OWolverine.Models.Ogame
         {
             if(obj is Moon moon)
             {
-                Name = moon.Name;
-                Size = moon.Size;
+                if(Name != moon.Name) Name = moon.Name;
+                if(Size != moon.Size) Size = moon.Size;
             }
         }
     }
