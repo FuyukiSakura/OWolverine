@@ -57,6 +57,8 @@ namespace OWolverine.Controllers
         {
             var vm = new StarIndexViewModel(await _context.Universes
                 .Include(u => u.Players)
+                .Include(u => u.Planets)
+                    .ThenInclude(p => p.Moon)
                 .ToArrayAsync());
             var lastSelection = HttpContext.Session.GetInt32(SessionServerSelection);
             if (lastSelection != null)

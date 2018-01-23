@@ -65,6 +65,8 @@ namespace OWolverine.Models.StarMapViewModels
         public string Name => Universe.Name;
         [Display(Name = "Active")]
         public int ActivePlayers => Universe.Players.Where(p => p.IsActive).Count();
+        [Display(Name = "Moons")]
+        public int Moons => Universe.Planets.Where(p => p.Moon != null).Count();
         [Display(Name = "Map update date")]
         public string MapUpdateDay => Universe.PlanetsLastUpdate == null ? "" : ((DateTime)Universe.PlanetsLastUpdate).ToString("ddd");
         [Display(Name = "Last Update")]
