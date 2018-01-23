@@ -69,7 +69,7 @@ namespace OWolverine.Models.StarMapViewModels
         public int Moons => Universe.Planets.Where(p => p.Moon != null).Count();
         [Display(Name = "Map update date")]
         public string MapUpdateDay => Universe.PlanetsLastUpdate == null ? "" : ((DateTime)Universe.PlanetsLastUpdate).ToString("ddd");
-        [Display(Name = "Last Update")]
+        [Display(Name = "Last Update (Server time GMT +8)")]
         public DateTime? LastUpdate => DateTimeHelper.GetLatestDate(ServerDates);
     }
 
