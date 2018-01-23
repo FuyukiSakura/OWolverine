@@ -201,6 +201,7 @@ namespace OWolverine.Controllers
                 .Include(u => u.Alliances)
                     .ThenInclude(a => a.Members)
                 .Include(u => u.Planets)
+                    .ThenInclude(p => p.Moon)
                 .FirstOrDefault(u => u.Id == id);
             if (universe == null) return NotFound();
 
@@ -282,13 +283,28 @@ namespace OWolverine.Controllers
             var planetData = OgameApi.GetAllPlanets(id);
             var planetList = planetData.Planets;
             var planetLastUpdate = DateTimeHelper.UnixTimeStampToDateTime(planetData.LastUpdate);
-            var removePlanetList = new List<Planet>();
             if (planetLastUpdate != universe.PlanetsLastUpdate)
             {
                 //Only update if the API Date is different
                 //Update existing planets
                 var removeList = new List<Planet>();
-                foreach(var planet in universe.Planets)
+                planetList.ForEach(p =>
+                {
+                    //Assign real owner ID
+                    var owner = universe.Players.FirstOrDefault(e => e.PlayerId == p.OwnerId);
+                    if (owner == null) {
+                        //Player removed planet no longer exists
+                        removeList.Add(p);
+                    }
+                    else
+                    {
+                        p.OwnerId = owner.Id;
+                    }
+                });
+                planetList.RemoveAll(p => removeList.Contains(p));
+
+                removeList.Clear();
+                foreach (var planet in universe.Planets)
                 {
                     var pNew = planetList.FirstOrDefault(p => p.PlanetId == planet.PlanetId);
                     if (pNew == null)
@@ -302,22 +318,8 @@ namespace OWolverine.Controllers
                         planetList.Remove(pNew); //Remove updated item
                     }
                 }
-                planetList.ForEach(p =>
-                {
-                    //Assign real owner ID
-                    var owner = universe.Players.FirstOrDefault(e => e.PlayerId == p.OwnerId);
-                    if (owner == null) {
-                        //Player removed planet no longer exists
-                        removePlanetList.Add(p);
-                    }
-                    else
-                    {
-                        p.OwnerId = owner.Id;
-                    }
-                });
                 //Remove planets no longer exists
                 _context.RemoveRange(removeList);
-                planetList.RemoveAll(p => removePlanetList.Contains(p)); //Planet cannot exist without player too
                 await _context.AddRangeAsync(planetList);
                 universe.PlanetsLastUpdate = planetLastUpdate;
             }
