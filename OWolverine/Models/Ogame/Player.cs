@@ -70,6 +70,7 @@ namespace OWolverine.Models.Ogame
             set => _AllianceId = value == null ? -1 : (int)value;
         }
         public Alliance Alliance { get; set; }
+        public Score Score { get; set; }
 
         //Status Property
         public bool IsAdmin { get; set; }

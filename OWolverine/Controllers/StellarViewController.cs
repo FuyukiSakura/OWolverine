@@ -192,6 +192,92 @@ namespace OWolverine.Controllers
             return View("Index", sivm);
         }
 
+        public async Task<IActionResult> RefreshScoreBoard(int id)
+        {
+            var universe = _context.Universes
+                .Include(e => e.Players)
+                    .ThenInclude(p => p.Score)
+                        .ThenInclude(s => s.UpdateHistory)
+                .FirstOrDefault(e => e.Id == id);
+            var totalScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Total);
+            var militaryScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Military);
+            foreach (var player in universe.Players)
+            {
+                var isUpdated = false;
+                if(player.Score == null)
+                {
+                    //Backward compatability
+                    player.Score = new Score();
+                    _context.Add(player.Score);
+                }
+
+                if(player.Score.LastUpdate == totalScoreData.LastUpdate)
+                {
+                    //Ignore entry if last update time match
+                    //continue;
+                }
+
+                var totalScore = totalScoreData.Scores.FirstOrDefault(s => s.Id == player.PlayerId);
+                if(totalScore != null && totalScore.Value != player.Score.Total)
+                {
+                    //Update only if found and different
+                    player.Score.UpdateHistory.Add(GenerateScoreHistory(ScoreType.Total, 
+                        player.Score.Total, 
+                        totalScore.Value, 
+                        totalScoreData.LastUpdate));
+                    player.Score.Total = totalScore.Value;
+                    player.Score.LastUpdate = totalScoreData.LastUpdate;
+                    isUpdated = true;
+                }
+
+                var militaryScore = militaryScoreData.Scores.FirstOrDefault(s => s.Id == player.PlayerId);
+                if (militaryScore != null && militaryScore.Value != player.Score.Military)
+                {
+                    //Update only if found and different
+                    player.Score.UpdateHistory.Add(GenerateScoreHistory(ScoreType.Military, 
+                        player.Score.Military,
+                        militaryScore.Value, 
+                        militaryScoreData.LastUpdate));
+                    player.Score.Military = militaryScore.Value;
+                    player.Score.Ships = militaryScore.Ships;
+                    isUpdated = true;
+                }
+
+                //Track changes
+                if (isUpdated)
+                {
+                    _context.Update(player);
+                }
+            }
+            await _context.SaveChangesAsync();
+            return new JsonResult("");
+        }
+
+        private UpdateHistory GenerateScoreHistory (ScoreType type, int oldValue, int newValue, DateTime ApiTime)
+        {
+            return GenerateHistory("Score", type.ToString(), oldValue.ToString(), newValue.ToString(), ApiTime);
+        }
+
+        /// <summary>
+        /// Generate new history object
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="fieldname"></param>
+        /// <param name="oldValue"></param>
+        /// <param name="newValue"></param>
+        /// <returns></returns>
+        private UpdateHistory GenerateHistory(string context, string fieldname, string oldValue, string newValue, DateTime ApiTime)
+        {
+            return new UpdateHistory
+            {
+                Context = context,
+                FieldName = fieldname,
+                OriginalValue = oldValue,
+                NewValue = newValue,
+                UpdatedAt = ApiTime
+            };
+        }
+
         /// <summary>
         /// Refresh universe data
         /// </summary>

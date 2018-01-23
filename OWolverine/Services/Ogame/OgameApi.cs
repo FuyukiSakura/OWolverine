@@ -17,6 +17,7 @@ namespace OWolverine.Services.Ogame
         private const string universes = "universes.xml";
         private const string serverDataAPI = "serverData.xml";
         private const string playerDataApi = "playerData.xml";
+        private const string highScoreApi = "highscore.xml";
 
         private const int mainServer = 101;
 
@@ -74,6 +75,11 @@ namespace OWolverine.Services.Ogame
             return allianceList;
         }
 
+        /// <summary>
+        /// Get all planets in a server
+        /// </summary>
+        /// <param name="serverId"></param>
+        /// <returns></returns>
         public static PlanetList GetAllPlanets(int serverId)
         {
             var serializer = new XmlSerializer(typeof(PlanetList));
@@ -83,6 +89,17 @@ namespace OWolverine.Services.Ogame
                 a.ServerId = serverId;
             }); //Assign server id
             return planetList;
+        }
+
+        /// <summary>
+        /// Get high score in the given server
+        /// </summary>
+        /// <param name="serverId"></param>
+        /// <returns></returns>
+        public static HighScore GetHighScore(int serverId, ScoreCategory category, ScoreType type)
+        {
+            var serializer = new XmlSerializer(typeof(HighScore));
+            return ((HighScore)serializer.Deserialize(RequestAPI(serverId, highScoreApi, $"?category={(int)category}&type={(int)type}")));
         }
 
         /// <summary>
