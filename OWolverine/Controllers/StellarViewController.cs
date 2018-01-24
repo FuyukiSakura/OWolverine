@@ -106,6 +106,7 @@ namespace OWolverine.Controllers
                     .Include(u => u.Planets)
                     .AsNoTracking()
                     .First(u => u.Id == vm.ServerId);
+                await UpdateScoreBoard(vm.ServerId); //Update score board in every search
 
                 var players = new List<Player>();
                 var planets = new List<Planet>();
@@ -224,7 +225,7 @@ namespace OWolverine.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<IActionResult> UpdateScoreBoard(int id)
+        public async Task UpdateScoreBoard(int id)
         {
             var universe = _context.Universes
                 .Include(e => e.Players)
@@ -246,7 +247,7 @@ namespace OWolverine.Controllers
                 if(player.Score.LastUpdate == totalScoreData.LastUpdate)
                 {
                     //Ignore entry if last update time match
-                    //continue;
+                    continue;
                 }
 
                 var totalScore = totalScoreData.Scores.FirstOrDefault(s => s.Id == player.PlayerId);
@@ -278,11 +279,11 @@ namespace OWolverine.Controllers
                 //Track changes
                 if (isUpdated)
                 {
+                    player.LastUpdate = totalScoreData.LastUpdate;
                     _context.Update(player);
                 }
             }
             await _context.SaveChangesAsync();
-            return new JsonResult("");
         }
 
         /// <summary>

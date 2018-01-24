@@ -125,6 +125,7 @@ namespace OWolverine.Models.Ogame
         public string Name => _player.Name;
         public Alliance Alliance => _player.Alliance;
         public List<Planet> Planets => _player.Planets;
+        public int ServerId => _player.ServerId;
         //Status
         public string StatusText => HasStatus ? $"(Status: {_player.Status})":"";
         public bool HasStatus => _player.Status != "";
@@ -182,6 +183,7 @@ namespace OWolverine.Models.Ogame
                     String.Format("{0} Hour{1}", diff.Hours, diff.Hours > 1 ? "s" : ""));
             }
         }
+        public string LastUpdate => _player.LastUpdate.ToString("g");
 
         public PlayerViewModel(Player player)
         {

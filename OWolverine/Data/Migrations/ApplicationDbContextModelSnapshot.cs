@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Storage.Internal;
 using OWolverine.Data;
 using System;
 
@@ -260,6 +262,8 @@ namespace OWolverine.Data.Migrations
 
                     b.Property<int?>("AllianceId");
 
+                    b.Property<DateTime>("CreatedAt");
+
                     b.Property<bool>("IsAdmin");
 
                     b.Property<bool>("IsBanned");
@@ -278,6 +282,8 @@ namespace OWolverine.Data.Migrations
 
                     b.Property<int>("PlayerId");
 
+                    b.Property<int?>("ScoreId");
+
                     b.Property<int>("ServerId");
 
                     b.HasKey("Id");
@@ -286,9 +292,43 @@ namespace OWolverine.Data.Migrations
 
                     b.HasIndex("AllianceId");
 
+                    b.HasIndex("ScoreId")
+                        .IsUnique()
+                        .HasFilter("[ScoreId] IS NOT NULL");
+
                     b.HasIndex("ServerId");
 
                     b.ToTable("Player","og");
+                });
+
+            modelBuilder.Entity("OWolverine.Models.Ogame.Score", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("Economy");
+
+                    b.Property<int>("Honor");
+
+                    b.Property<DateTime>("LastUpdate");
+
+                    b.Property<int>("Military");
+
+                    b.Property<int>("MilitaryBuit");
+
+                    b.Property<int>("MilitaryDestroyed");
+
+                    b.Property<int>("MilitaryLost");
+
+                    b.Property<int>("Research");
+
+                    b.Property<int>("Ships");
+
+                    b.Property<int>("Total");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HighScore","og");
                 });
 
             modelBuilder.Entity("OWolverine.Models.Ogame.Universe", b =>
@@ -336,6 +376,28 @@ namespace OWolverine.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Universe","og");
+                });
+
+            modelBuilder.Entity("OWolverine.Models.ScoreHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("NewValue");
+
+                    b.Property<int>("OldValue");
+
+                    b.Property<int?>("ScoreId");
+
+                    b.Property<string>("Type");
+
+                    b.Property<DateTime>("UpdatedAt");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ScoreId");
+
+                    b.ToTable("ScoreHistory","og");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -420,10 +482,21 @@ namespace OWolverine.Data.Migrations
                         .HasForeignKey("AllianceId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("OWolverine.Models.Ogame.Score", "Score")
+                        .WithOne("Player")
+                        .HasForeignKey("OWolverine.Models.Ogame.Player", "ScoreId");
+
                     b.HasOne("OWolverine.Models.Ogame.Universe", "Server")
                         .WithMany("Players")
                         .HasForeignKey("ServerId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("OWolverine.Models.ScoreHistory", b =>
+                {
+                    b.HasOne("OWolverine.Models.Ogame.Score", "Score")
+                        .WithMany("UpdateHistory")
+                        .HasForeignKey("ScoreId");
                 });
 #pragma warning restore 612, 618
         }
