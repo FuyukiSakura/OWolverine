@@ -107,6 +107,11 @@ namespace OWolverine.Controllers
                     .AsNoTracking()
                     .First(u => u.Id == vm.ServerId);
                 await UpdateScoreBoard(vm.ServerId); //Update score board in every search
+                if ((DateTime.Now - universe.LastUpdate).Days >= 1)
+                {
+                    //Update universe if older than 1 day
+                    await UpdateUniverse(vm.ServerId);
+                }
 
                 var players = new List<Player>();
                 var planets = new List<Planet>();
@@ -309,7 +314,7 @@ namespace OWolverine.Controllers
         /// Refresh universe data
         /// </summary>
         /// <param name="id"></param>
-        public async Task<IActionResult> RefreshUniverse(int id)
+        public async Task UpdateUniverse(int id)
         {
             var universe = _context.Universes
                 .Include(u => u.Players)
@@ -318,7 +323,7 @@ namespace OWolverine.Controllers
                 .Include(u => u.Planets)
                     .ThenInclude(p => p.Moon)
                 .FirstOrDefault(u => u.Id == id);
-            if (universe == null) return NotFound();
+            if (universe == null) return; //NotFound();
 
             //Load players into DB
             var playersData = OgameApi.GetAllPlayers(id);
@@ -439,7 +444,7 @@ namespace OWolverine.Controllers
             }
             universe.LastUpdate = DateTime.Now;
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
+            //return RedirectToAction("Index");
         }
 
         [HttpPost]
