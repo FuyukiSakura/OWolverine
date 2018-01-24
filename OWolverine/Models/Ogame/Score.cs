@@ -59,7 +59,8 @@ namespace OWolverine.Models.Ogame
         public int Economy { get; set; }
         public int Research { get; set; }
         public int Military { get; set; }
-        public int Ships { get; set; }
+        public int Ship { get; set; }
+        public int ShipNumber { get; set; }
         public int MilitaryBuit { get; set; }
         public int MilitaryDestroyed { get; set; }
         public int MilitaryLost { get; set; }

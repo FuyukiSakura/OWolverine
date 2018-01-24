@@ -80,46 +80,47 @@
                         <a data-toggle="collapse" href="#collapse-@player.Id">
                             @player.Name
                             @player.StatusText
-                            | Score Total: @player.ScoreTotal <span style="color:@(player.ScoreTotalDiff > 0 ? "#00B300":"red")">(@(player.ScoreTotalDiff > 0?"+":"")@player.ScoreTotalDiff)</span>
-                            | Military:  @player.ScoreMilitary <span style="color:@(player.ScoreTotalDiff > 0 ? "#00B300":"red")">(@(player.ScoreMilitaryDiff > 0 ? "+" : "")@player.ScoreMilitaryDiff)</span>
-                            | Ships: @player.Ships 
+                            | Ship Score:  @player.ScoreShip <span style="color:@(player.ScoreShipDiff > 0 ? "#00B300":"red")">(@(player.ScoreShipDiff > 0 ? "+" : "")@player.ScoreShipDiff)</span>
+                            | Ships: @player.ShipNumber 
                             <span class="pull-right">Snapshot time: @(player.SnapshotDiff) | Last update: @(player.LastUpdate)</span>
                         </a>
                     </h4>
                 </div>
                 <div id="collapse-@player.Id" class="panel-collapse @(Model.Players.Count == 1 ? "" : "collapse")">
                     <div class="panel-body">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>
-                                        @Html.DisplayNameFor(model => player.Planets[0].Name)
-                                    </th>
-                                    <th>
-                                        @Html.DisplayNameFor(model => player.Planets[0].Coord)
-                                    </th>
-                                    <th>
-                                        @Html.DisplayNameFor(model => player.Planets[0].Moon)
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var planet in player.Planets)
-                                {
+                        Score Total: @player.ScoreTotal <span style="color:@(player.ScoreTotalDiff > 0 ? "#00B300":"red")">(@(player.ScoreTotalDiff > 0 ? "+" : "")@player.ScoreTotalDiff)</span>
+                        | Military: @player.ScoreMilitary <span style="color:@(player.ScoreMilitaryDiff > 0 ? "#00B300":"red")">(@(player.ScoreMilitaryDiff > 0 ? "+" : "")@player.ScoreMilitaryDiff)</span>
+                            <table class="table">
+                                <thead>
                                     <tr>
-                                        <td>
-                                            @Html.DisplayFor(modelItem => planet.Name)
-                                        </td>
-                                        <td>
-                                            @Html.DisplayFor(modelItem => planet.Coord)
-                                        </td>
-                                        <td>
-                                            @Html.DisplayFor(modelItem => planet.Moon.Name)
-                                        </td>
+                                        <th>
+                                            @Html.DisplayNameFor(model => player.Planets[0].Name)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => player.Planets[0].Coord)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => player.Planets[0].Moon)
+                                        </th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach (var planet in player.Planets)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => planet.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => planet.Coord)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => planet.Moon.Name)
+                        </td>
+                    </tr>
+}
+                                </tbody>
+                            </table>
                     </div>
                     <div class="panel-footer">@(player.Alliance == null ? "N/A" : @player.Alliance.Name + " - " + @player.Alliance.Tag)</div>
                 </div>
@@ -155,34 +156,40 @@
                 <th>
                     @Html.DisplayNameFor(model => model.Servers[0].LastUpdate)
                 </th>
+                <th>
+                    
+                </th>
             </tr>
         </thead>
         <tbody>
             @foreach (var item in Model.Servers)
             {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Id)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Name)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Universe.Speed) / @Html.DisplayFor(modelItem => item.Universe.FleetSpeed)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.ActivePlayers) / @Html.DisplayFor(modelItem => item.Universe.Players.Count)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Moons) / @Html.DisplayFor(modelItem => item.Universe.Planets.Count)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.MapUpdateDay)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.LastUpdate)
-                    </td>
-                </tr>
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Universe.Speed) / @Html.DisplayFor(modelItem => item.Universe.FleetSpeed)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ActivePlayers) / @Html.DisplayFor(modelItem => item.Universe.Players.Count)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Moons) / @Html.DisplayFor(modelItem => item.Universe.Planets.Count)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MapUpdateDay)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastUpdate)
+                </td>
+                <td>
+                    <a href="/StellarView/UpdateScoreBoard/@item.Id">Update Scoreboard</a>
+                </td>
+            </tr>
             }
         </tbody>
     </table>

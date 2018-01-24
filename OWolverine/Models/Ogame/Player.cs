@@ -157,7 +157,20 @@ namespace OWolverine.Models.Ogame
                 return historyMilitary.NewValue - historyMilitary.OldValue;
             }
         }
-        public int Ships => _player.Score.Ships;
+        public int ScoreShip => _player.Score.Ship;
+        public int ScoreShipDiff
+        {
+            get
+            {
+                var historyShip = _player.Score.UpdateHistory.FirstOrDefault(h => h.Type == "Ship");
+                if (historyShip == null)
+                {
+                    return 0;
+                }
+                return historyShip.NewValue - historyShip.OldValue;
+            }
+        }
+        public int ShipNumber => _player.Score.ShipNumber;
         public string SnapshotDiff
         {
             get
@@ -169,10 +182,10 @@ namespace OWolverine.Models.Ogame
                 TimeSpan diff;
                 if (historyTotal.Length <= 0)
                 {
-                    diff = DateTime.UtcNow - _player.CreatedAt;
+                    diff = DateTime.UtcNow - _player.LastUpdate;
                 } else if (historyTotal.Length == 1)
                 {
-                    diff = historyTotal[0].UpdatedAt - _player.CreatedAt;
+                    diff = _player.Score.LastUpdate - historyTotal[0].UpdatedAt;
                 }
                 else
                 {
