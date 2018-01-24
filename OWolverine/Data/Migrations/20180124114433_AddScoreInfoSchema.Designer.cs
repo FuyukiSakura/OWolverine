@@ -11,7 +11,7 @@ using System;
 namespace OWolverine.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20180124055854_AddScoreInfoSchema")]
+    [Migration("20180124114433_AddScoreInfoSchema")]
     partial class AddScoreInfoSchema
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -323,7 +323,9 @@ namespace OWolverine.Data.Migrations
 
                     b.Property<int>("Research");
 
-                    b.Property<int>("Ships");
+                    b.Property<int>("Ship");
+
+                    b.Property<int>("ShipNumber");
 
                     b.Property<int>("Total");
 

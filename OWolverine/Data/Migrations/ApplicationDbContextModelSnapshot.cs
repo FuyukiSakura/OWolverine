@@ -322,7 +322,9 @@ namespace OWolverine.Data.Migrations
 
                     b.Property<int>("Research");
 
-                    b.Property<int>("Ships");
+                    b.Property<int>("Ship");
+
+                    b.Property<int>("ShipNumber");
 
                     b.Property<int>("Total");
 

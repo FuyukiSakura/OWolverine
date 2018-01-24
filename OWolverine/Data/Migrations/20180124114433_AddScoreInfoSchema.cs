@@ -39,7 +39,8 @@ namespace OWolverine.Data.Migrations
                     MilitaryDestroyed = table.Column<int>(type: "int", nullable: false),
                     MilitaryLost = table.Column<int>(type: "int", nullable: false),
                     Research = table.Column<int>(type: "int", nullable: false),
-                    Ships = table.Column<int>(type: "int", nullable: false),
+                    Ship = table.Column<int>(type: "int", nullable: false),
+                    ShipNumber = table.Column<int>(type: "int", nullable: false),
                     Total = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
