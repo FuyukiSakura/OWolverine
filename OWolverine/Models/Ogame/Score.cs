@@ -1,4 +1,6 @@
 ﻿using CSharpUtilities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -59,7 +61,8 @@ namespace OWolverine.Models.Ogame
         public int Economy { get; set; }
         public int Research { get; set; }
         public int Military { get; set; }
-        public int Ships { get; set; }
+        public int Ship { get; set; }
+        public int ShipNumber { get; set; }
         public int MilitaryBuit { get; set; }
         public int MilitaryDestroyed { get; set; }
         public int MilitaryLost { get; set; }
@@ -68,5 +71,16 @@ namespace OWolverine.Models.Ogame
 
         public List<ScoreHistory> UpdateHistory { get; set; } = new List<ScoreHistory>();
         public DateTime LastUpdate { get; set; }
+    }
+
+    public class ScoreConfiguration : IEntityTypeConfiguration<Score>
+    {
+        public void Configure(EntityTypeBuilder<Score> builder)
+        {
+            builder.ToTable("HighScore", "og");
+            builder.HasMany(e => e.UpdateHistory)
+                .WithOne(h => h.Score)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
     }
 }

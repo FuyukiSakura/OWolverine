@@ -157,7 +157,20 @@ namespace OWolverine.Models.Ogame
                 return historyMilitary.NewValue - historyMilitary.OldValue;
             }
         }
-        public int Ships => _player.Score.Ships;
+        public int ScoreShip => _player.Score.Ship;
+        public int ScoreShipDiff
+        {
+            get
+            {
+                var historyShip = _player.Score.UpdateHistory.FirstOrDefault(h => h.Type == "Ship");
+                if (historyShip == null)
+                {
+                    return 0;
+                }
+                return historyShip.NewValue - historyShip.OldValue;
+            }
+        }
+        public int ShipNumber => _player.Score.ShipNumber;
         public string SnapshotDiff
         {
             get
@@ -169,10 +182,10 @@ namespace OWolverine.Models.Ogame
                 TimeSpan diff;
                 if (historyTotal.Length <= 0)
                 {
-                    diff = DateTime.UtcNow - _player.CreatedAt;
+                    diff = DateTime.UtcNow - _player.LastUpdate;
                 } else if (historyTotal.Length == 1)
                 {
-                    diff = historyTotal[0].UpdatedAt - _player.CreatedAt;
+                    diff = _player.Score.LastUpdate - historyTotal[0].UpdatedAt;
                 }
                 else
                 {
@@ -181,6 +194,30 @@ namespace OWolverine.Models.Ogame
                 return String.Format("{0} {1}",
                     diff.Days == 0 ? "" : String.Format("{0} Day{1}", diff.Days, diff.Days > 1 ? "s" : ""),
                     String.Format("{0} Hour{1}", diff.Hours, diff.Hours > 1 ? "s" : ""));
+            }
+        }
+        public string Style
+        {
+            get
+            {
+                if (ShipNumber == 0 || ScoreShip < 3000)
+                {
+                    return "N/A";
+                }
+
+                var avgShipScore = ScoreShip / ShipNumber;
+                if (ScoreMilitary / ScoreShip > 2.5)
+                {
+                    if (avgShipScore > 10)
+                    {
+                        return "Wolf";
+                    }
+                    else
+                    {
+                        return "Sheep";
+                    }
+                }
+                return "Turtle";
             }
         }
         public string LastUpdate => _player.LastUpdate.ToString("g");

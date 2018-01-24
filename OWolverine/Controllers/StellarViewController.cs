@@ -106,12 +106,11 @@ namespace OWolverine.Controllers
                     .Include(u => u.Planets)
                     .AsNoTracking()
                     .First(u => u.Id == vm.ServerId);
-                await UpdateScoreBoard(vm.ServerId); //Update score board in every search
-                if ((DateTime.Now - universe.LastUpdate).Days >= 1)
+                /* if ((DateTime.Now - universe.LastUpdate).Days >= 1)
                 {
                     //Update universe if older than 1 day
                     await UpdateUniverse(vm.ServerId);
-                }
+                } */
 
                 var players = new List<Player>();
                 var planets = new List<Planet>();
@@ -204,18 +203,22 @@ namespace OWolverine.Controllers
                         continue;
                     }
 
-                    var totalSecord = player.Score.UpdateHistory
-                        .Where(h => h.Type == ScoreType.Total.ToString())
-                        .OrderByDescending(h => h.UpdatedAt)
-                        .Take(2).ToArray();
-
                     player.Score.UpdateHistory = player.Score.UpdateHistory
                         .GroupBy(h => h.Type)
                         .Select(g => g.OrderByDescending(h => h.UpdatedAt).First())
                         .ToList();
-                    if (totalSecord.Length == 2)
+
+                    var totalFirst = player.Score.UpdateHistory.FirstOrDefault(h => h.Type == ScoreType.Total.ToString());
+                    if (totalFirst != null && totalFirst.UpdatedAt == player.Score.LastUpdate)
                     {
-                        player.Score.UpdateHistory.Add(totalSecord[1]);
+                        var totalSecord = player.Score.UpdateHistory
+                            .Where(h => h.Type == ScoreType.Total.ToString())
+                            .OrderByDescending(h => h.UpdatedAt)
+                            .Take(2).ToArray();
+                        if (totalSecord.Length >= 2)
+                        {
+                            player.Score.UpdateHistory.Add(totalSecord[1]);
+                        }
                     }
                 }
                 sivm.Planets = planets;
@@ -230,7 +233,7 @@ namespace OWolverine.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task UpdateScoreBoard(int id)
+        public async Task<IActionResult> UpdateScoreBoard(int id)
         {
             var universe = _context.Universes
                 .Include(e => e.Players)
@@ -239,56 +242,95 @@ namespace OWolverine.Controllers
                 .FirstOrDefault(e => e.Id == id);
             var totalScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Total);
             var militaryScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Military);
+            var economyScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Economy);
+            var researchScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Research);
             foreach (var player in universe.Players)
             {
-                var isUpdated = false;
-                if(player.Score == null)
+                if (player.Score == null)
                 {
                     //Backward compatability
                     player.Score = new Score();
                     _context.Add(player.Score);
                 }
 
-                if(player.Score.LastUpdate == totalScoreData.LastUpdate)
+                if (player.Score.LastUpdate == totalScoreData.LastUpdate)
                 {
                     //Ignore entry if last update time match
                     continue;
                 }
+                player.Score.LastUpdate = totalScoreData.LastUpdate;
 
+                // Score: Total
                 var totalScore = totalScoreData.Scores.FirstOrDefault(s => s.Id == player.PlayerId);
-                if(totalScore != null && totalScore.Value != player.Score.Total)
+                if (totalScore != null && totalScore.Value != player.Score.Total)
                 {
                     //Update only if found and different
-                    player.Score.UpdateHistory.Add(GenerateScoreHistory(ScoreType.Total, 
-                        player.Score.Total, 
-                        totalScore.Value, 
+                    player.Score.UpdateHistory.Add(GenerateScoreHistory(ScoreType.Total,
+                        player.Score.Total,
+                        totalScore.Value,
                         totalScoreData.LastUpdate));
                     player.Score.Total = totalScore.Value;
-                    player.Score.LastUpdate = totalScoreData.LastUpdate;
-                    isUpdated = true;
                 }
 
+                // Score: Economy
+                var econScore = economyScoreData.Scores.FirstOrDefault(s => s.Id == player.PlayerId);
+                if (econScore != null && econScore.Value != player.Score.Economy)
+                {
+                    //Update only if found and different
+                    player.Score.UpdateHistory.Add(GenerateScoreHistory(ScoreType.Economy,
+                        player.Score.Economy,
+                        econScore.Value,
+                        economyScoreData.LastUpdate));
+                    player.Score.Economy = econScore.Value;
+                }
+
+                // Score: Research
+                var researchScore = researchScoreData.Scores.FirstOrDefault(s => s.Id == player.PlayerId);
+                if (researchScore != null && researchScore.Value != player.Score.Research)
+                {
+                    //Update only if found and different
+                    player.Score.UpdateHistory.Add(GenerateScoreHistory(ScoreType.Research,
+                        player.Score.Research,
+                        researchScore.Value,
+                        researchScoreData.LastUpdate));
+                    player.Score.Research = researchScore.Value;
+                }
+
+                // Score: Military
                 var militaryScore = militaryScoreData.Scores.FirstOrDefault(s => s.Id == player.PlayerId);
                 if (militaryScore != null && militaryScore.Value != player.Score.Military)
                 {
                     //Update only if found and different
-                    player.Score.UpdateHistory.Add(GenerateScoreHistory(ScoreType.Military, 
+                    player.Score.UpdateHistory.Add(GenerateScoreHistory(ScoreType.Military,
                         player.Score.Military,
-                        militaryScore.Value, 
+                        militaryScore.Value,
                         militaryScoreData.LastUpdate));
                     player.Score.Military = militaryScore.Value;
-                    player.Score.Ships = militaryScore.Ships;
-                    isUpdated = true;
+                    player.Score.ShipNumber = militaryScore.Ships;
                 }
 
-                //Track changes
-                if (isUpdated)
+                var shipScore = player.Score.Military - (player.Score.Economy + player.Score.Research + player.Score.Military - player.Score.Total);
+                if (shipScore != player.Score.Ship)
+                {
+                    player.Score.UpdateHistory.Add(new ScoreHistory
+                    {
+                        Type = "Ship",
+                        OldValue = player.Score.Ship,
+                        NewValue = shipScore,
+                        UpdatedAt = totalScoreData.LastUpdate
+                    });
+                    player.Score.Ship = shipScore;
+                }
+
+                if (player.LastUpdate < totalScoreData.LastUpdate)
                 {
                     player.LastUpdate = totalScoreData.LastUpdate;
-                    _context.Update(player);
                 }
+                //Track changes
+                _context.Update(player);
             }
             await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
         }
 
         /// <summary>
@@ -314,7 +356,7 @@ namespace OWolverine.Controllers
         /// Refresh universe data
         /// </summary>
         /// <param name="id"></param>
-        public async Task UpdateUniverse(int id)
+        public async Task<IActionResult> UpdateUniverse(int id)
         {
             var universe = _context.Universes
                 .Include(u => u.Players)
@@ -323,7 +365,7 @@ namespace OWolverine.Controllers
                 .Include(u => u.Planets)
                     .ThenInclude(p => p.Moon)
                 .FirstOrDefault(u => u.Id == id);
-            if (universe == null) return; //NotFound();
+            if (universe == null) return NotFound();
 
             //Load players into DB
             var playersData = OgameApi.GetAllPlayers(id);
@@ -444,7 +486,7 @@ namespace OWolverine.Controllers
             }
             universe.LastUpdate = DateTime.Now;
             await _context.SaveChangesAsync();
-            //return RedirectToAction("Index");
+            return RedirectToAction("Index");
         }
 
         [HttpPost]

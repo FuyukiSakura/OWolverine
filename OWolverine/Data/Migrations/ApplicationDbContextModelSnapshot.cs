@@ -322,7 +322,9 @@ namespace OWolverine.Data.Migrations
 
                     b.Property<int>("Research");
 
-                    b.Property<int>("Ships");
+                    b.Property<int>("Ship");
+
+                    b.Property<int>("ShipNumber");
 
                     b.Property<int>("Total");
 
@@ -496,7 +498,8 @@ namespace OWolverine.Data.Migrations
                 {
                     b.HasOne("OWolverine.Models.Ogame.Score", "Score")
                         .WithMany("UpdateHistory")
-                        .HasForeignKey("ScoreId");
+                        .HasForeignKey("ScoreId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }
