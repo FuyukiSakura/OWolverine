@@ -96,10 +96,13 @@ namespace OWolverine.Controllers
 
                 var universe = _context.Universes
                     .Include(u => u.Players)
-                        .ThenInclude(p => p.Alliance)
+                        .ThenInclude(player => player.Alliance)
                     .Include(u => u.Players)
                         .ThenInclude(player => player.Planets)
                         .ThenInclude(planet => planet.Moon)
+                    .Include(u => u.Players)
+                        .ThenInclude(player => player.Score)
+                            .ThenInclude(s => s.UpdateHistory)
                     .Include(u => u.Planets)
                     .AsNoTracking()
                     .First(u => u.Id == vm.ServerId);
@@ -138,7 +141,6 @@ namespace OWolverine.Controllers
                 }
                 else
                 {
-
                     //Normal Search
                     players = universe
                         .Players
@@ -185,14 +187,32 @@ namespace OWolverine.Controllers
                         players.RemoveAll(e => !e.Planets.Where(p => planets.Contains(p)).Any());
                     }
                 }
+
+                //Load Player score
+                foreach(var player in players)
+                {
+                    player.Score.UpdateHistory = player.Score.UpdateHistory
+                        .GroupBy(h => h.Type)
+                        .Select(g => g.OrderByDescending(h => h.UpdatedAt).First())
+                        .ToList();
+                    /* _context.Entry(player.Score).Collection(p => p.UpdateHistory)
+                        .Query()
+                        .GroupBy(h => h.FieldName)
+                        .Select(g => g.OrderByDescending(h => h.UpdatedAt).First()); */
+                }
                 sivm.Planets = planets;
-                sivm.Players = players;
+                sivm.AssignPlayers(players);
                 sivm.IsSearch = true;
             }
             return View("Index", sivm);
         }
 
-        public async Task<IActionResult> RefreshScoreBoard(int id)
+        /// <summary>
+        /// Update player scores
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> UpdateScoreBoard(int id)
         {
             var universe = _context.Universes
                 .Include(e => e.Players)

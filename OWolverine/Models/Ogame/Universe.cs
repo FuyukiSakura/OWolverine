@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CSharpUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
@@ -63,5 +64,32 @@ namespace OWolverine.Models.Ogame
         [XmlIgnore]
         public List<Planet> Planets { get; set; } = new List<Planet>();
         public DateTime? PlanetsLastUpdate { get; set; }
+    }
+
+    public class UniverseViewModel
+    {
+        public Universe Universe { get; set; }
+        public string FeelingLucky { get; set; }
+        private List<DateTime> ServerDates { get; set; } = new List<DateTime>();
+        public UniverseViewModel(Universe server, string playerName)
+        {
+            Universe = server;
+            FeelingLucky = playerName;
+            if (server.PlayersLastUpdate != null) ServerDates.Add((DateTime)server.PlayersLastUpdate);
+            if (server.AllianceLastUpdate != null) ServerDates.Add((DateTime)server.AllianceLastUpdate);
+            if (server.PlanetsLastUpdate != null) ServerDates.Add((DateTime)server.PlanetsLastUpdate);
+        }
+
+        [Display(Name = "Server ID")]
+        public int Id => Universe.Id;
+        public string Name => Universe.Name;
+        [Display(Name = "Active")]
+        public int ActivePlayers => Universe.Players.Where(p => p.IsActive).Count();
+        [Display(Name = "Moons")]
+        public int Moons => Universe.Planets.Where(p => p.Moon != null).Count();
+        [Display(Name = "Map update date")]
+        public string MapUpdateDay => Universe.PlanetsLastUpdate == null ? "" : ((DateTime)Universe.PlanetsLastUpdate).ToString("ddd");
+        [Display(Name = "Last Update (Server time GMT +8)")]
+        public DateTime? LastUpdate => DateTimeHelper.GetLatestDate(ServerDates);
     }
 }

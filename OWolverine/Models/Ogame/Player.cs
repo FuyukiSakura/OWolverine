@@ -114,6 +114,52 @@ namespace OWolverine.Models.Ogame
         }
     }
 
+    public class PlayerViewModel
+    {
+        private Player _player { get; set; }
+        public int Id => _player.Id;
+        public string Name => _player.Name;
+        public Alliance Alliance => _player.Alliance;
+        public List<Planet> Planets => _player.Planets;
+        //Status
+        public string StatusText => HasStatus ? $"(Status: {_player.Status})":"";
+        public bool HasStatus => _player.Status != "";
+        //Score Total
+        public int ScoreTotal => _player.Score.Total;
+        public int ScoreTotalDiff
+        {
+            get
+            {
+                var historyTotal = _player.Score.UpdateHistory.FirstOrDefault(h => h.Type == ScoreType.Total.ToString());
+                if (historyTotal == null)
+                {
+                    return 0;
+                }
+                return historyTotal.NewValue - historyTotal.OldValue;
+            }
+        }
+        //Score Military
+        public int ScoreMilitary => _player.Score.Military;
+        public int ScoreMilitaryDiff
+        {
+            get
+            {
+                var historyMilitary = _player.Score.UpdateHistory.FirstOrDefault(h => h.Type == ScoreType.Military.ToString());
+                if (historyMilitary == null)
+                {
+                    return 0;
+                }
+                return historyMilitary.NewValue - historyMilitary.OldValue;
+            }
+        }
+        public int Ships => _player.Score.Ships;
+
+        public PlayerViewModel(Player player)
+        {
+            _player = player;
+        }
+    }
+
     public class PlayerConfiguration : IEntityTypeConfiguration<Player>
     {
         public void Configure(EntityTypeBuilder<Player> builder)
