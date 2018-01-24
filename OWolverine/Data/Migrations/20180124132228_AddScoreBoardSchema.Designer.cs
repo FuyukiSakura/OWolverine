@@ -11,8 +11,8 @@ using System;
 namespace OWolverine.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20180124114433_AddScoreInfoSchema")]
-    partial class AddScoreInfoSchema
+    [Migration("20180124132228_AddScoreBoardSchema")]
+    partial class AddScoreBoardSchema
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -499,7 +499,8 @@ namespace OWolverine.Data.Migrations
                 {
                     b.HasOne("OWolverine.Models.Ogame.Score", "Score")
                         .WithMany("UpdateHistory")
-                        .HasForeignKey("ScoreId");
+                        .HasForeignKey("ScoreId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

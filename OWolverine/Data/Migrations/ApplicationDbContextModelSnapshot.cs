@@ -498,7 +498,8 @@ namespace OWolverine.Data.Migrations
                 {
                     b.HasOne("OWolverine.Models.Ogame.Score", "Score")
                         .WithMany("UpdateHistory")
-                        .HasForeignKey("ScoreId");
+                        .HasForeignKey("ScoreId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

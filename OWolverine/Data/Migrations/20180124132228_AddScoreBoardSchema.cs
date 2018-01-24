@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace OWolverine.Data.Migrations
 {
-    public partial class AddScoreInfoSchema : Migration
+    public partial class AddScoreBoardSchema : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -70,7 +70,7 @@ namespace OWolverine.Data.Migrations
                         principalSchema: "og",
                         principalTable: "HighScore",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(

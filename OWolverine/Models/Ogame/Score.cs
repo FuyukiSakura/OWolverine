@@ -1,4 +1,6 @@
 ﻿using CSharpUtilities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -69,5 +71,16 @@ namespace OWolverine.Models.Ogame
 
         public List<ScoreHistory> UpdateHistory { get; set; } = new List<ScoreHistory>();
         public DateTime LastUpdate { get; set; }
+    }
+
+    public class ScoreConfiguration : IEntityTypeConfiguration<Score>
+    {
+        public void Configure(EntityTypeBuilder<Score> builder)
+        {
+            builder.ToTable("HighScore", "og");
+            builder.HasMany(e => e.UpdateHistory)
+                .WithOne(h => h.Score)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
     }
 }
