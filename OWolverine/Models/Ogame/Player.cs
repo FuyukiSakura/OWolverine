@@ -200,6 +200,11 @@ namespace OWolverine.Models.Ogame
         {
             get
             {
+                if (ShipNumber == 0 || ScoreShip < 3000)
+                {
+                    return "N/A";
+                }
+
                 var avgShipScore = ScoreShip / ShipNumber;
                 if (ScoreShip > ScoreMilitary / 2)
                 {
