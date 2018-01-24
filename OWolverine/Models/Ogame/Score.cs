@@ -66,7 +66,7 @@ namespace OWolverine.Models.Ogame
         public int Honor { get; set; }
         public Player Player { get; set; }
 
-        public List<UpdateHistory> UpdateHistory { get; set; } = new List<UpdateHistory>();
+        public List<ScoreHistory> UpdateHistory { get; set; } = new List<ScoreHistory>();
         public DateTime LastUpdate { get; set; }
     }
 }

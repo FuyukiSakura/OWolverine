@@ -253,26 +253,20 @@ namespace OWolverine.Controllers
             return new JsonResult("");
         }
 
-        private UpdateHistory GenerateScoreHistory (ScoreType type, int oldValue, int newValue, DateTime ApiTime)
-        {
-            return GenerateHistory("Score", type.ToString(), oldValue.ToString(), newValue.ToString(), ApiTime);
-        }
-
         /// <summary>
-        /// Generate new history object
+        /// Generate Score History
         /// </summary>
-        /// <param name="context"></param>
-        /// <param name="fieldname"></param>
+        /// <param name="type"></param>
         /// <param name="oldValue"></param>
         /// <param name="newValue"></param>
+        /// <param name="ApiTime"></param>
         /// <returns></returns>
-        private UpdateHistory GenerateHistory(string context, string fieldname, string oldValue, string newValue, DateTime ApiTime)
+        private ScoreHistory GenerateScoreHistory (ScoreType type, int oldValue, int newValue, DateTime ApiTime)
         {
-            return new UpdateHistory
+            return new ScoreHistory
             {
-                Context = context,
-                FieldName = fieldname,
-                OriginalValue = oldValue,
+                Type = type.ToString(),
+                OldValue = oldValue,
                 NewValue = newValue,
                 UpdatedAt = ApiTime
             };

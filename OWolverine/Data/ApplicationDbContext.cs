@@ -31,7 +31,7 @@ namespace OWolverine.Data
             builder.ApplyConfiguration(new PlanetConfiguration());
             builder.Entity<Moon>().ToTable("Moon", "og");
             builder.Entity<Score>().ToTable("HighScore", "og");
-            builder.Entity<UpdateHistory>().ToTable("UpdateHistory", "og");
+            builder.Entity<ScoreHistory>().ToTable("ScoreHistory", "og");
         }
     }
 }
