@@ -206,7 +206,7 @@ namespace OWolverine.Models.Ogame
                 }
 
                 var avgShipScore = ScoreShip / ShipNumber;
-                if (ScoreMilitary / ScoreShip > 2.5)
+                if (ScoreShip > ScoreMilitary * 0.75)
                 {
                     if (avgShipScore > 10)
                     {
