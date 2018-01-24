@@ -54,6 +54,7 @@ namespace OWolverine.Services.Ogame
             playerList.Players.ForEach(p => {
                 p.AllianceId = null; //Unset alliance
                 p.ServerId = serverId; //Attach server
+                p.CreatedAt = playerList.LastUpdate;
             });
             return playerList;
         }

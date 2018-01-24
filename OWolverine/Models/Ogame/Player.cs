@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CSharpUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OWolverine.Models.Database;
 using System;
@@ -17,7 +18,9 @@ namespace OWolverine.Models.Ogame
         [XmlElement("player")]
         public List<Player> Players { get; set; }
         [XmlAttribute("timestamp")]
-        public double LastUpdate { get; set; }
+        public double Timestamp { get; set; }
+        [XmlIgnore]
+        public DateTime LastUpdate => DateTimeHelper.UnixTimeStampToDateTime(Timestamp);
     }
 
     public class Player : IUpdatable
@@ -91,6 +94,7 @@ namespace OWolverine.Models.Ogame
         public List<Planet> Planets { get; set; } = new List<Planet>();
         public int ServerId { get;set; }
         public Universe Server { get; set; }
+        public DateTime CreatedAt { get; set; }
         public DateTime LastUpdate { get; set; }
 
         /// <summary>
@@ -153,6 +157,31 @@ namespace OWolverine.Models.Ogame
             }
         }
         public int Ships => _player.Score.Ships;
+        public string SnapshotDiff
+        {
+            get
+            {
+                var historyTotal = _player.Score.UpdateHistory
+                    .Where(h => h.Type == ScoreType.Total.ToString())
+                    .OrderByDescending(h => h.UpdatedAt)
+                    .ToArray();
+                TimeSpan diff;
+                if (historyTotal.Length <= 0)
+                {
+                    diff = DateTime.UtcNow - _player.CreatedAt;
+                } else if (historyTotal.Length == 1)
+                {
+                    diff = historyTotal[0].UpdatedAt - _player.CreatedAt;
+                }
+                else
+                {
+                    diff = historyTotal[0].UpdatedAt - historyTotal[1].UpdatedAt;
+                }
+                return String.Format("{0} {1}",
+                    diff.Days == 0 ? "" : String.Format("{0} Day{1}", diff.Days, diff.Days > 1 ? "s" : ""),
+                    String.Format("{0} Hour{1}", diff.Hours, diff.Hours > 1 ? "s" : ""));
+            }
+        }
 
         public PlayerViewModel(Player player)
         {

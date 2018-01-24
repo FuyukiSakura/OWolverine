@@ -82,7 +82,7 @@
                             @player.StatusText
                             | Score Total: @player.ScoreTotal <span style="color:@(player.ScoreTotalDiff > 0 ? "#00B300":"red")">(@(player.ScoreTotalDiff > 0?"+":"") @player.ScoreTotalDiff)</span>
                             | Military:  @player.ScoreMilitary <span style="color:@(player.ScoreTotalDiff > 0 ? "#00B300":"red")">(@(player.ScoreMilitaryDiff > 0 ? "+" : "") @player.ScoreMilitaryDiff)</span>
-                            | Ships: @player.Ships
+                            | Ships: @player.Ships | Snapshot time: @(player.SnapshotDiff)
                         </a>
                     </h4>
                 </div>

@@ -191,14 +191,26 @@ namespace OWolverine.Controllers
                 //Load Player score
                 foreach(var player in players)
                 {
+                    if(player.Score == null)
+                    {
+                        //Backward compatability
+                        player.Score = new Score();
+                        continue;
+                    }
+
+                    var totalSecord = player.Score.UpdateHistory
+                        .Where(h => h.Type == ScoreType.Total.ToString())
+                        .OrderByDescending(h => h.UpdatedAt)
+                        .Take(2).ToArray();
+
                     player.Score.UpdateHistory = player.Score.UpdateHistory
                         .GroupBy(h => h.Type)
                         .Select(g => g.OrderByDescending(h => h.UpdatedAt).First())
                         .ToList();
-                    /* _context.Entry(player.Score).Collection(p => p.UpdateHistory)
-                        .Query()
-                        .GroupBy(h => h.FieldName)
-                        .Select(g => g.OrderByDescending(h => h.UpdatedAt).First()); */
+                    if (totalSecord.Length == 2)
+                    {
+                        player.Score.UpdateHistory.Add(totalSecord[1]);
+                    }
                 }
                 sivm.Planets = planets;
                 sivm.AssignPlayers(players);
@@ -310,8 +322,7 @@ namespace OWolverine.Controllers
             //Load players into DB
             var playersData = OgameApi.GetAllPlayers(id);
             var playerList = playersData.Players;
-            var playersLastUpdate = DateTimeHelper.UnixTimeStampToDateTime(playersData.LastUpdate);
-            if (playersLastUpdate != universe.PlayersLastUpdate)
+            if (playersData.LastUpdate != universe.PlayersLastUpdate)
             {
                 //Only update if the API Date is different
                 var removeList = new List<Player>();
@@ -331,7 +342,7 @@ namespace OWolverine.Controllers
                 }
                 _context.RemoveRange(removeList);
                 await _context.AddRangeAsync(playerList);
-                universe.PlayersLastUpdate = playersLastUpdate; //Update API Date
+                universe.PlayersLastUpdate = playersData.LastUpdate; //Update API Date
                 await _context.SaveChangesAsync();
             }
 
