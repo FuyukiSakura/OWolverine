@@ -196,6 +196,25 @@ namespace OWolverine.Models.Ogame
                     String.Format("{0} Hour{1}", diff.Hours, diff.Hours > 1 ? "s" : ""));
             }
         }
+        public string Style
+        {
+            get
+            {
+                var avgShipScore = ScoreShip / ShipNumber;
+                if (ScoreShip > ScoreMilitary / 2)
+                {
+                    if (avgShipScore > 5)
+                    {
+                        return "Wolf";
+                    }
+                    else
+                    {
+                        return "Sheep";
+                    }
+                }
+                return "Turtle";
+            }
+        }
         public string LastUpdate => _player.LastUpdate.ToString("g");
 
         public PlayerViewModel(Player player)
