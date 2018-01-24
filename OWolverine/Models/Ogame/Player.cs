@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CSharpUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OWolverine.Models.Database;
 using System;
@@ -17,7 +18,9 @@ namespace OWolverine.Models.Ogame
         [XmlElement("player")]
         public List<Player> Players { get; set; }
         [XmlAttribute("timestamp")]
-        public double LastUpdate { get; set; }
+        public double Timestamp { get; set; }
+        [XmlIgnore]
+        public DateTime LastUpdate => DateTimeHelper.UnixTimeStampToDateTime(Timestamp);
     }
 
     public class Player : IUpdatable
@@ -70,6 +73,7 @@ namespace OWolverine.Models.Ogame
             set => _AllianceId = value == null ? -1 : (int)value;
         }
         public Alliance Alliance { get; set; }
+        public Score Score { get; set; }
 
         //Status Property
         public bool IsAdmin { get; set; }
@@ -90,6 +94,7 @@ namespace OWolverine.Models.Ogame
         public List<Planet> Planets { get; set; } = new List<Planet>();
         public int ServerId { get;set; }
         public Universe Server { get; set; }
+        public DateTime CreatedAt { get; set; }
         public DateTime LastUpdate { get; set; }
 
         /// <summary>
@@ -110,6 +115,79 @@ namespace OWolverine.Models.Ogame
                     Status = player.Status;
                 }
             }
+        }
+    }
+
+    public class PlayerViewModel
+    {
+        private Player _player { get; set; }
+        public int Id => _player.Id;
+        public string Name => _player.Name;
+        public Alliance Alliance => _player.Alliance;
+        public List<Planet> Planets => _player.Planets;
+        public int ServerId => _player.ServerId;
+        //Status
+        public string StatusText => HasStatus ? $"(Status: {_player.Status})":"";
+        public bool HasStatus => _player.Status != "";
+        //Score Total
+        public int ScoreTotal => _player.Score.Total;
+        public int ScoreTotalDiff
+        {
+            get
+            {
+                var historyTotal = _player.Score.UpdateHistory.FirstOrDefault(h => h.Type == ScoreType.Total.ToString());
+                if (historyTotal == null)
+                {
+                    return 0;
+                }
+                return historyTotal.NewValue - historyTotal.OldValue;
+            }
+        }
+        //Score Military
+        public int ScoreMilitary => _player.Score.Military;
+        public int ScoreMilitaryDiff
+        {
+            get
+            {
+                var historyMilitary = _player.Score.UpdateHistory.FirstOrDefault(h => h.Type == ScoreType.Military.ToString());
+                if (historyMilitary == null)
+                {
+                    return 0;
+                }
+                return historyMilitary.NewValue - historyMilitary.OldValue;
+            }
+        }
+        public int Ships => _player.Score.Ships;
+        public string SnapshotDiff
+        {
+            get
+            {
+                var historyTotal = _player.Score.UpdateHistory
+                    .Where(h => h.Type == ScoreType.Total.ToString())
+                    .OrderByDescending(h => h.UpdatedAt)
+                    .ToArray();
+                TimeSpan diff;
+                if (historyTotal.Length <= 0)
+                {
+                    diff = DateTime.UtcNow - _player.CreatedAt;
+                } else if (historyTotal.Length == 1)
+                {
+                    diff = historyTotal[0].UpdatedAt - _player.CreatedAt;
+                }
+                else
+                {
+                    diff = historyTotal[0].UpdatedAt - historyTotal[1].UpdatedAt;
+                }
+                return String.Format("{0} {1}",
+                    diff.Days == 0 ? "" : String.Format("{0} Day{1}", diff.Days, diff.Days > 1 ? "s" : ""),
+                    String.Format("{0} Hour{1}", diff.Hours, diff.Hours > 1 ? "s" : ""));
+            }
+        }
+        public string LastUpdate => _player.LastUpdate.ToString("g");
+
+        public PlayerViewModel(Player player)
+        {
+            _player = player;
         }
     }
 

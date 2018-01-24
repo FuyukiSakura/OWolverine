@@ -57,6 +57,8 @@ namespace OWolverine.Controllers
         {
             var vm = new StarIndexViewModel(await _context.Universes
                 .Include(u => u.Players)
+                .Include(u => u.Planets)
+                    .ThenInclude(p => p.Moon)
                 .ToArrayAsync());
             var lastSelection = HttpContext.Session.GetInt32(SessionServerSelection);
             if (lastSelection != null)
@@ -94,13 +96,22 @@ namespace OWolverine.Controllers
 
                 var universe = _context.Universes
                     .Include(u => u.Players)
-                        .ThenInclude(p => p.Alliance)
+                        .ThenInclude(player => player.Alliance)
                     .Include(u => u.Players)
                         .ThenInclude(player => player.Planets)
                         .ThenInclude(planet => planet.Moon)
+                    .Include(u => u.Players)
+                        .ThenInclude(player => player.Score)
+                            .ThenInclude(s => s.UpdateHistory)
                     .Include(u => u.Planets)
                     .AsNoTracking()
                     .First(u => u.Id == vm.ServerId);
+                await UpdateScoreBoard(vm.ServerId); //Update score board in every search
+                if ((DateTime.Now - universe.LastUpdate).Days >= 1)
+                {
+                    //Update universe if older than 1 day
+                    await UpdateUniverse(vm.ServerId);
+                }
 
                 var players = new List<Player>();
                 var planets = new List<Planet>();
@@ -136,7 +147,6 @@ namespace OWolverine.Controllers
                 }
                 else
                 {
-
                     //Normal Search
                     players = universe
                         .Players
@@ -183,18 +193,128 @@ namespace OWolverine.Controllers
                         players.RemoveAll(e => !e.Planets.Where(p => planets.Contains(p)).Any());
                     }
                 }
+
+                //Load Player score
+                foreach(var player in players)
+                {
+                    if(player.Score == null)
+                    {
+                        //Backward compatability
+                        player.Score = new Score();
+                        continue;
+                    }
+
+                    var totalSecord = player.Score.UpdateHistory
+                        .Where(h => h.Type == ScoreType.Total.ToString())
+                        .OrderByDescending(h => h.UpdatedAt)
+                        .Take(2).ToArray();
+
+                    player.Score.UpdateHistory = player.Score.UpdateHistory
+                        .GroupBy(h => h.Type)
+                        .Select(g => g.OrderByDescending(h => h.UpdatedAt).First())
+                        .ToList();
+                    if (totalSecord.Length == 2)
+                    {
+                        player.Score.UpdateHistory.Add(totalSecord[1]);
+                    }
+                }
                 sivm.Planets = planets;
-                sivm.Players = players;
+                sivm.AssignPlayers(players);
                 sivm.IsSearch = true;
             }
             return View("Index", sivm);
         }
 
         /// <summary>
+        /// Update player scores
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task UpdateScoreBoard(int id)
+        {
+            var universe = _context.Universes
+                .Include(e => e.Players)
+                    .ThenInclude(p => p.Score)
+                        .ThenInclude(s => s.UpdateHistory)
+                .FirstOrDefault(e => e.Id == id);
+            var totalScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Total);
+            var militaryScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Military);
+            foreach (var player in universe.Players)
+            {
+                var isUpdated = false;
+                if(player.Score == null)
+                {
+                    //Backward compatability
+                    player.Score = new Score();
+                    _context.Add(player.Score);
+                }
+
+                if(player.Score.LastUpdate == totalScoreData.LastUpdate)
+                {
+                    //Ignore entry if last update time match
+                    continue;
+                }
+
+                var totalScore = totalScoreData.Scores.FirstOrDefault(s => s.Id == player.PlayerId);
+                if(totalScore != null && totalScore.Value != player.Score.Total)
+                {
+                    //Update only if found and different
+                    player.Score.UpdateHistory.Add(GenerateScoreHistory(ScoreType.Total, 
+                        player.Score.Total, 
+                        totalScore.Value, 
+                        totalScoreData.LastUpdate));
+                    player.Score.Total = totalScore.Value;
+                    player.Score.LastUpdate = totalScoreData.LastUpdate;
+                    isUpdated = true;
+                }
+
+                var militaryScore = militaryScoreData.Scores.FirstOrDefault(s => s.Id == player.PlayerId);
+                if (militaryScore != null && militaryScore.Value != player.Score.Military)
+                {
+                    //Update only if found and different
+                    player.Score.UpdateHistory.Add(GenerateScoreHistory(ScoreType.Military, 
+                        player.Score.Military,
+                        militaryScore.Value, 
+                        militaryScoreData.LastUpdate));
+                    player.Score.Military = militaryScore.Value;
+                    player.Score.Ships = militaryScore.Ships;
+                    isUpdated = true;
+                }
+
+                //Track changes
+                if (isUpdated)
+                {
+                    player.LastUpdate = totalScoreData.LastUpdate;
+                    _context.Update(player);
+                }
+            }
+            await _context.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Generate Score History
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="oldValue"></param>
+        /// <param name="newValue"></param>
+        /// <param name="ApiTime"></param>
+        /// <returns></returns>
+        private ScoreHistory GenerateScoreHistory (ScoreType type, int oldValue, int newValue, DateTime ApiTime)
+        {
+            return new ScoreHistory
+            {
+                Type = type.ToString(),
+                OldValue = oldValue,
+                NewValue = newValue,
+                UpdatedAt = ApiTime
+            };
+        }
+
+        /// <summary>
         /// Refresh universe data
         /// </summary>
         /// <param name="id"></param>
-        public async Task<IActionResult> RefreshUniverse(int id)
+        public async Task UpdateUniverse(int id)
         {
             var universe = _context.Universes
                 .Include(u => u.Players)
@@ -203,13 +323,12 @@ namespace OWolverine.Controllers
                 .Include(u => u.Planets)
                     .ThenInclude(p => p.Moon)
                 .FirstOrDefault(u => u.Id == id);
-            if (universe == null) return NotFound();
+            if (universe == null) return; //NotFound();
 
             //Load players into DB
             var playersData = OgameApi.GetAllPlayers(id);
             var playerList = playersData.Players;
-            var playersLastUpdate = DateTimeHelper.UnixTimeStampToDateTime(playersData.LastUpdate);
-            if (playersLastUpdate != universe.PlayersLastUpdate)
+            if (playersData.LastUpdate != universe.PlayersLastUpdate)
             {
                 //Only update if the API Date is different
                 var removeList = new List<Player>();
@@ -229,7 +348,7 @@ namespace OWolverine.Controllers
                 }
                 _context.RemoveRange(removeList);
                 await _context.AddRangeAsync(playerList);
-                universe.PlayersLastUpdate = playersLastUpdate; //Update API Date
+                universe.PlayersLastUpdate = playersData.LastUpdate; //Update API Date
                 await _context.SaveChangesAsync();
             }
 
@@ -325,7 +444,7 @@ namespace OWolverine.Controllers
             }
             universe.LastUpdate = DateTime.Now;
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
+            //return RedirectToAction("Index");
         }
 
         [HttpPost]

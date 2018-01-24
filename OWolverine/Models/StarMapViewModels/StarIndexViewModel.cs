@@ -15,7 +15,7 @@ namespace OWolverine.Models.StarMapViewModels
         public StarSearchViewModel SearchViewModel { get; set; }
 
         //Display Elements
-        public List<Player> Players { get; set; } = new List<Player>();
+        public List<PlayerViewModel> Players { get; set; } = new List<PlayerViewModel>();
         public List<Planet> Planets { get; set; } = new List<Planet>();
         public List<UniverseViewModel> Servers { get; set; } = new List<UniverseViewModel>();
         public bool IsSearch { get; set; }
@@ -41,34 +41,19 @@ namespace OWolverine.Models.StarMapViewModels
                 Servers.Add(new UniverseViewModel(u, playerName));
             }
         }
-    }
 
-    /// <summary>
-    /// Universe ASP displayable format
-    /// </summary>
-    public class UniverseViewModel
-    {
-        public Universe Universe { get; set; }
-        public string FeelingLucky { get; set; }
-        private List<DateTime> ServerDates { get; set; } = new List<DateTime>();
-        public UniverseViewModel(Universe server, string playerName)
+        /// <summary>
+        /// Cast players into PlayerViewModel
+        /// </summary>
+        /// <param name="players"></param>
+        public void AssignPlayers(List<Player> players)
         {
-            Universe = server;
-            FeelingLucky = playerName;
-            if (server.PlayersLastUpdate != null) ServerDates.Add((DateTime)server.PlayersLastUpdate);
-            if (server.AllianceLastUpdate != null) ServerDates.Add((DateTime)server.AllianceLastUpdate);
-            if (server.PlanetsLastUpdate != null) ServerDates.Add((DateTime)server.PlanetsLastUpdate);
+            Players = new List<PlayerViewModel>();
+            foreach (var p in players)
+            {
+                Players.Add(new PlayerViewModel(p));
+            }
         }
-
-        [Display(Name = "Server ID")]
-        public int Id => Universe.Id;
-        public string Name => Universe.Name;
-        [Display(Name = "Active")]
-        public int ActivePlayers => Universe.Players.Where(p => p.IsActive).Count();
-        [Display(Name = "Map update date")]
-        public string MapUpdateDay => Universe.PlanetsLastUpdate == null ? "" : ((DateTime)Universe.PlanetsLastUpdate).ToString("ddd");
-        [Display(Name = "Last Update")]
-        public DateTime? LastUpdate => DateTimeHelper.GetLatestDate(ServerDates);
     }
 
     /// <summary>
