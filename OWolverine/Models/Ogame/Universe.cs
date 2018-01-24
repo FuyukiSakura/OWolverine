@@ -87,7 +87,7 @@ namespace OWolverine.Models.Ogame
         public int ActivePlayers => Universe.Players.Where(p => p.IsActive).Count();
         [Display(Name = "Moons")]
         public int Moons => Universe.Planets.Where(p => p.Moon != null).Count();
-        [Display(Name = "Map update date")]
+        [Display(Name = "Map update day")]
         public string MapUpdateDay => Universe.PlanetsLastUpdate == null ? "" : ((DateTime)Universe.PlanetsLastUpdate).ToString("ddd");
         [Display(Name = "Last Update (Server time GMT +8)")]
         public DateTime? LastUpdate => DateTimeHelper.GetLatestDate(ServerDates);
