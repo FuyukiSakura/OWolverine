@@ -149,7 +149,7 @@
                     @Html.DisplayNameFor(model => model.Servers[0].ActivePlayers) / @Html.DisplayNameFor(model => model.Servers[0].Universe.Players)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Servers[0].Moons) / @Html.DisplayNameFor(model => model.Servers[0].Universe.Planets)
+                    @Html.DisplayNameFor(model => model.Servers[0].CountMoons) / @Html.DisplayNameFor(model => model.Servers[0].CountPlanets)
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.Servers[0].MapUpdateDay)
@@ -179,7 +179,7 @@
                     @Html.DisplayFor(modelItem => item.ActivePlayers) / @Html.DisplayFor(modelItem => item.Universe.Players.Count)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Moons) / @Html.DisplayFor(modelItem => item.Universe.Planets.Count)
+                    @Html.DisplayFor(modelItem => item.CountMoons) / @Html.DisplayFor(modelItem => item.CountPlanets)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.MapUpdateDay)

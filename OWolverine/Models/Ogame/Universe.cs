@@ -65,8 +65,6 @@ namespace OWolverine.Models.Ogame
         [XmlIgnore]
         public List<Alliance> Alliances { get; set; } = new List<Alliance>();
         public DateTime AllianceLastUpdate { get; set; }
-        [XmlIgnore]
-        public List<Planet> Planets { get; set; } = new List<Planet>();
         public DateTime PlanetsLastUpdate { get; set; }
     }
 
@@ -90,7 +88,9 @@ namespace OWolverine.Models.Ogame
         [Display(Name = "Active")]
         public int ActivePlayers => Universe.Players.Where(p => p.IsActive).Count();
         [Display(Name = "Moons")]
-        public int Moons => Universe.Planets.Where(p => p.Moon != null).Count();
+        public int CountMoons { get; set; }
+        [Display(Name = "Planets")]
+        public int CountPlanets { get; set; }
         [Display(Name = "Map update day")]
         public string MapUpdateDay => Universe.PlanetsLastUpdate == null ? "" : ((DateTime)Universe.PlanetsLastUpdate).ToString("ddd");
         [Display(Name = "Last Update (Server time GMT +8)")]
