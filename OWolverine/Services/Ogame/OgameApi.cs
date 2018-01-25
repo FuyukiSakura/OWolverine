@@ -52,11 +52,7 @@ namespace OWolverine.Services.Ogame
         {
             var serializer = new XmlSerializer(typeof(PlayerList));
             var playerList = ((PlayerList)serializer.Deserialize(RequestAPI(serverId, playerAPI)));
-            playerList.Players.ForEach(p => {
-                p.AllianceId = null; //Unset alliance
-                p.ServerId = serverId; //Attach server
-                p.CreatedAt = playerList.LastUpdate;
-            });
+            playerList.Players.ForEach(p => p.CreatedAt = playerList.LastUpdate);
             return playerList;
         }
 
@@ -72,7 +68,6 @@ namespace OWolverine.Services.Ogame
             allianceList.Alliances.ForEach(a =>
             {
                 a.ServerId = serverId;
-                a.Members.ForEach(m => m.ServerId = serverId);
             }); //Assign server id
             return allianceList;
         }

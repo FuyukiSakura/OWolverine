@@ -71,6 +71,33 @@ namespace OWolverine.Controllers
         }
 
         /// <summary>
+        /// Update the server list
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> UpdateServerList()
+        {
+            var servers = OgameApi.GetAllUniverses();
+            foreach (var server in servers)
+            {
+                await StarMapBLL.CreateServerDocumentIfNotExistsAsync(server);
+            }
+            return RedirectToAction("Index");
+        }
+
+        /// <summary>
+        /// Refresh universe data
+        /// </summary>
+        /// <param name="id"></param>
+        public async Task<IActionResult> UpdateUniverse(int id)
+        {
+            var players = OgameApi.GetAllPlayers(id);
+            var universe = await StarMapBLL.GetServer(id);
+            universe.Players = players.Players;
+            await StarMapBLL.UpdateServerAsync(universe);
+            return RedirectToAction("Index");
+        }
+
+        /// <summary>
         /// Update player scores
         /// </summary>
         /// <param name="id"></param>
@@ -97,25 +124,6 @@ namespace OWolverine.Controllers
                 NewValue = newValue,
                 UpdatedAt = ApiTime
             };
-        }
-
-        /// <summary>
-        /// Refresh universe data
-        /// </summary>
-        /// <param name="id"></param>
-        public async Task<IActionResult> UpdateUniverse(int id)
-        {
-            return RedirectToAction("Index");
-        }
-
-        public async Task<IActionResult> UpdateServerList()
-        {
-            var servers = OgameApi.GetAllUniverses();
-            foreach (var server in servers)
-            {
-                await StarMapBLL.CreateServerDocumentIfNotExists(server);
-            }
-            return RedirectToAction("Index");
         }
 
         public IActionResult Error()

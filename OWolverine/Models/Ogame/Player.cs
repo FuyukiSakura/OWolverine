@@ -1,6 +1,7 @@
 ﻿using CSharpUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Newtonsoft.Json;
 using OWolverine.Models.Database;
 using System;
 using System.Collections.Generic;
@@ -25,13 +26,12 @@ namespace OWolverine.Models.Ogame
 
     public class Player : IUpdatable
     {
-        public int Id { get; set; }
         [XmlAttribute("id")]
-        public int PlayerId { get; set; }
+        public int Id { get; set; }
         [XmlAttribute("name")]
         public string Name { get; set; }
         [XmlAttribute("status")]
-        [NotMapped]
+        [JsonIgnore]
         public string Status {
             get
             {
@@ -56,22 +56,8 @@ namespace OWolverine.Models.Ogame
         }
 
         [XmlAttribute("alliance")]
-        [NotMapped]
-        private int _AllianceId { get; set; }
-        public int? AllianceId
-        {
-            get
-            {
-                if (_AllianceId == -1) {
-                    return null;
-                }
-                else
-                {
-                    return _AllianceId;
-                }
-            }
-            set => _AllianceId = value == null ? -1 : (int)value;
-        }
+        public int AllianceId { get; set; }
+        [JsonIgnore]
         public Alliance Alliance { get; set; }
         public Score Score { get; set; }
 
@@ -91,9 +77,7 @@ namespace OWolverine.Models.Ogame
             }
         }
 
-        public List<Planet> Planets { get; set; } = new List<Planet>();
-        public int ServerId { get;set; }
-        public Universe Server { get; set; }
+        public List<Planet> Planets { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime LastUpdate { get; set; }
 
@@ -125,7 +109,6 @@ namespace OWolverine.Models.Ogame
         public string Name => _player.Name;
         public Alliance Alliance => _player.Alliance;
         public List<Planet> Planets => _player.Planets;
-        public int ServerId => _player.ServerId;
         //Status
         public string StatusText => HasStatus ? $"(Status: {_player.Status})":"";
         public bool HasStatus => _player.Status != "";

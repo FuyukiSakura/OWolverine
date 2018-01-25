@@ -77,9 +77,9 @@ namespace OWolverine.Models.Ogame
         {
             Universe = server;
             FeelingLucky = playerName;
-            if (server.PlayersLastUpdate != null) ServerDates.Add((DateTime)server.PlayersLastUpdate);
-            if (server.AllianceLastUpdate != null) ServerDates.Add((DateTime)server.AllianceLastUpdate);
-            if (server.PlanetsLastUpdate != null) ServerDates.Add((DateTime)server.PlanetsLastUpdate);
+            if (server.PlayersLastUpdate != null) ServerDates.Add(server.PlayersLastUpdate);
+            if (server.AllianceLastUpdate != null) ServerDates.Add(server.AllianceLastUpdate);
+            if (server.PlanetsLastUpdate != null) ServerDates.Add(server.PlanetsLastUpdate);
         }
 
         [Display(Name = "Server ID")]

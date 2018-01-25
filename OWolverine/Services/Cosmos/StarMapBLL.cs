@@ -19,7 +19,7 @@ namespace OWolverine.Services.Cosmos
         /// </summary>
         /// <param name="universe"></param>
         /// <returns></returns>
-        public static async Task CreateServerDocumentIfNotExists(Universe universe)
+        public static async Task CreateServerDocumentIfNotExistsAsync(Universe universe)
         {
             try
             {
@@ -36,6 +36,21 @@ namespace OWolverine.Services.Cosmos
                     throw;
                 }
             }
+        }
+
+        /// <summary>
+        /// Load the server
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public static async Task<Universe> GetServer(int id)
+        {
+            return await _client.ReadDocumentAsync<Universe>(UriFactory.CreateDocumentUri(DatabaseName, CollectionName, "TW."+id));
+        }
+
+        public static async Task UpdateServerAsync(Universe item)
+        {
+            await _client.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(DatabaseName, CollectionName, item.Id), item);
         }
 
         /// <summary>
