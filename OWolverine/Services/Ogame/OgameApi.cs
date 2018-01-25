@@ -1,4 +1,5 @@
-﻿using OWolverine.Models.Ogame;
+﻿using CSharpUtilities;
+using OWolverine.Models.Ogame;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -36,7 +37,7 @@ namespace OWolverine.Services.Ogame
             foreach (var id in servers)
             {
                 var universe = (Universe)serializer.Deserialize(RequestAPI(id, serverDataAPI));
-                universe.LastUpdate = DateTime.Now;
+                universe.LastUpdate = DateTimeHelper.UnixTimeStampToDateTime(universe.Timestamp);
                 universeList.Add(universe);
             }
             return universeList.ToArray();

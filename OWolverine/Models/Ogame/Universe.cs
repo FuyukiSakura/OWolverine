@@ -52,6 +52,9 @@ namespace OWolverine.Models.Ogame
         public float DeuteriumSaveFactor { get; set; }
         [XmlElement("probeCargo")]
         public int ProbeCargo { get; set; }
+        [JsonIgnore]
+        [XmlAttribute("timestamp")]
+        public double Timestamp { get; set; }
         [XmlIgnore]
         public DateTime LastUpdate { get; set; }
 
