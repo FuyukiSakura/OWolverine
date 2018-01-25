@@ -227,24 +227,4 @@ namespace OWolverine.Models.Ogame
             _player = player;
         }
     }
-
-    public class PlayerConfiguration : IEntityTypeConfiguration<Player>
-    {
-        public void Configure(EntityTypeBuilder<Player> builder)
-        {
-            builder.ToTable("Player", "og");
-            builder.HasAlternateKey(e => new { e.PlayerId, e.ServerId });
-            builder.HasOne(e => e.Server)
-                .WithMany(u => u.Players)
-                .HasForeignKey(e => e.ServerId);
-            builder.HasMany(e => e.Planets)
-                .WithOne(p => p.Owner)
-                .HasForeignKey(p => p.OwnerId);
-            builder.HasOne(e => e.Alliance)
-                .WithMany(a => a.Members)
-                .HasForeignKey(e => e.AllianceId)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.SetNull);
-        }
-    }
 }

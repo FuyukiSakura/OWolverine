@@ -124,15 +124,4 @@ namespace OWolverine.Models.Ogame
             }
         }
     }
-
-    public class MoonConfiguration : IEntityTypeConfiguration<Moon>
-    {
-        public void Configure(EntityTypeBuilder<Moon> builder)
-        {
-            builder.ToTable("Moon", "og");
-            builder.HasOne<Planet>()
-                .WithOne()
-                .OnDelete(DeleteBehavior.Cascade);
-        }
-    }
 }

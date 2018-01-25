@@ -33,7 +33,8 @@ namespace OWolverine.Models.Ogame
         [XmlAttribute("founder")]
         [NotMapped]
         public int _founderId { get; set; }
-        public int? FounderId {
+        public int? FounderId
+        {
             get
             {
                 if (_founderId == -1)
@@ -63,32 +64,16 @@ namespace OWolverine.Models.Ogame
         /// <param name="obj"></param>
         public void Update(IUpdatable obj)
         {
-            if(obj is Alliance alliance)
+            if (obj is Alliance alliance)
             {
-                if(FounderId != alliance.FounderId) FounderId = alliance.FounderId;
-                if(Name != alliance.Name) Name = alliance.Name;
-                if(Tag != alliance.Tag) Tag = alliance.Tag;
+                if (FounderId != alliance.FounderId) FounderId = alliance.FounderId;
+                if (Name != alliance.Name) Name = alliance.Name;
+                if (Tag != alliance.Tag) Tag = alliance.Tag;
                 //Remove members that have left
                 Members.RemoveAll(e => !alliance.Members.Any(a => a.Id == e.Id));
                 //Add new members
                 Members.AddRange(alliance.Members.Where(a => !Members.Any(e => e.Id == a.Id)));
             }
-        }
-    }
-
-    public class AllianceConfiguration : IEntityTypeConfiguration<Alliance>
-    {
-        public void Configure(EntityTypeBuilder<Alliance> builder)
-        {
-            builder.ToTable("Alliance", "og");
-            builder.HasAlternateKey(e => new { e.AllianceId, e.ServerId });
-            builder.HasOne(e => e.Server)
-                .WithMany(u => u.Alliances)
-                .HasForeignKey(e => e.ServerId);
-            builder.HasOne(e => e.Founder)
-                .WithOne()
-                .HasForeignKey<Alliance>(e => e.FounderId)
-                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

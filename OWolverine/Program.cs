@@ -24,7 +24,6 @@ namespace OWolverine
                 try
                 {
                     var context = services.GetRequiredService<ApplicationDbContext>();
-                    DbInitializer.Initialize(context);
                 }
                 catch (Exception ex)
                 {

@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.EntityFrameworkCore.Storage.Internal;
 using OWolverine.Data;
 using System;
 
@@ -17,13 +15,12 @@ namespace OWolverine.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.0.0-rtm-26452")
+                .HasAnnotation("ProductVersion", "1.0.0-rc3")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                    b.Property<string>("Id");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
@@ -37,9 +34,7 @@ namespace OWolverine.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
-                        .IsUnique()
-                        .HasName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
+                        .HasName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles");
                 });
@@ -110,6 +105,8 @@ namespace OWolverine.Data.Migrations
 
                     b.HasIndex("RoleId");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("AspNetUserRoles");
                 });
 
@@ -130,8 +127,7 @@ namespace OWolverine.Data.Migrations
 
             modelBuilder.Entity("OWolverine.Models.ApplicationUser", b =>
                 {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                    b.Property<string>("Id");
 
                     b.Property<int>("AccessFailedCount");
 
@@ -173,239 +169,15 @@ namespace OWolverine.Data.Migrations
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
-                        .HasName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+                        .HasName("UserNameIndex");
 
                     b.ToTable("AspNetUsers");
-                });
-
-            modelBuilder.Entity("OWolverine.Models.Ogame.Alliance", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("AllianceId");
-
-                    b.Property<int?>("FounderId");
-
-                    b.Property<bool>("IsOpen");
-
-                    b.Property<string>("Name");
-
-                    b.Property<int>("ServerId");
-
-                    b.Property<string>("Tag");
-
-                    b.HasKey("Id");
-
-                    b.HasAlternateKey("AllianceId", "ServerId");
-
-                    b.HasIndex("FounderId")
-                        .IsUnique()
-                        .HasFilter("[FounderId] IS NOT NULL");
-
-                    b.HasIndex("ServerId");
-
-                    b.ToTable("Alliance","og");
-                });
-
-            modelBuilder.Entity("OWolverine.Models.Ogame.Moon", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("Name");
-
-                    b.Property<int>("Size");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Moon","og");
-                });
-
-            modelBuilder.Entity("OWolverine.Models.Ogame.Planet", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("Coord");
-
-                    b.Property<DateTime>("LastUpdated");
-
-                    b.Property<int?>("MoonId");
-
-                    b.Property<string>("Name");
-
-                    b.Property<int>("OwnerId");
-
-                    b.Property<int>("PlanetId");
-
-                    b.Property<int>("ServerId");
-
-                    b.HasKey("Id");
-
-                    b.HasAlternateKey("PlanetId", "ServerId");
-
-                    b.HasIndex("MoonId");
-
-                    b.HasIndex("OwnerId");
-
-                    b.HasIndex("ServerId");
-
-                    b.ToTable("Planet","og");
-                });
-
-            modelBuilder.Entity("OWolverine.Models.Ogame.Player", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int?>("AllianceId");
-
-                    b.Property<DateTime>("CreatedAt");
-
-                    b.Property<bool>("IsAdmin");
-
-                    b.Property<bool>("IsBanned");
-
-                    b.Property<bool>("IsFlee");
-
-                    b.Property<bool>("IsInactive");
-
-                    b.Property<bool>("IsLeft");
-
-                    b.Property<bool>("IsVocation");
-
-                    b.Property<DateTime>("LastUpdate");
-
-                    b.Property<string>("Name");
-
-                    b.Property<int>("PlayerId");
-
-                    b.Property<int?>("ScoreId");
-
-                    b.Property<int>("ServerId");
-
-                    b.HasKey("Id");
-
-                    b.HasAlternateKey("PlayerId", "ServerId");
-
-                    b.HasIndex("AllianceId");
-
-                    b.HasIndex("ScoreId")
-                        .IsUnique()
-                        .HasFilter("[ScoreId] IS NOT NULL");
-
-                    b.HasIndex("ServerId");
-
-                    b.ToTable("Player","og");
-                });
-
-            modelBuilder.Entity("OWolverine.Models.Ogame.Score", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("Economy");
-
-                    b.Property<int>("Honor");
-
-                    b.Property<DateTime>("LastUpdate");
-
-                    b.Property<int>("Military");
-
-                    b.Property<int>("MilitaryBuit");
-
-                    b.Property<int>("MilitaryDestroyed");
-
-                    b.Property<int>("MilitaryLost");
-
-                    b.Property<int>("Research");
-
-                    b.Property<int>("Ship");
-
-                    b.Property<int>("ShipNumber");
-
-                    b.Property<int>("Total");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("HighScore","og");
-                });
-
-            modelBuilder.Entity("OWolverine.Models.Ogame.Universe", b =>
-                {
-                    b.Property<int>("Id");
-
-                    b.Property<bool>("Acs");
-
-                    b.Property<DateTime?>("AllianceLastUpdate");
-
-                    b.Property<float>("DebrisFactor");
-
-                    b.Property<float>("DefToDebris");
-
-                    b.Property<float>("DeuteriumSaveFactor");
-
-                    b.Property<string>("Domain");
-
-                    b.Property<bool>("DonutGalaxy");
-
-                    b.Property<bool>("DonutSystem");
-
-                    b.Property<float>("FleetSpeed");
-
-                    b.Property<int>("Galaxies");
-
-                    b.Property<DateTime>("LastUpdate");
-
-                    b.Property<string>("Name");
-
-                    b.Property<DateTime?>("PlanetsLastUpdate");
-
-                    b.Property<DateTime?>("PlayersLastUpdate");
-
-                    b.Property<bool>("RapidFire");
-
-                    b.Property<float>("Speed");
-
-                    b.Property<int>("Systems");
-
-                    b.Property<int>("TopScore");
-
-                    b.Property<bool>("WreckField");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Universe","og");
-                });
-
-            modelBuilder.Entity("OWolverine.Models.ScoreHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("NewValue");
-
-                    b.Property<int>("OldValue");
-
-                    b.Property<int?>("ScoreId");
-
-                    b.Property<string>("Type");
-
-                    b.Property<DateTime>("UpdatedAt");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ScoreId");
-
-                    b.ToTable("ScoreHistory","og");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole")
-                        .WithMany()
+                        .WithMany("Claims")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
@@ -413,7 +185,7 @@ namespace OWolverine.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
                     b.HasOne("OWolverine.Models.ApplicationUser")
-                        .WithMany()
+                        .WithMany("Claims")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
@@ -421,7 +193,7 @@ namespace OWolverine.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.HasOne("OWolverine.Models.ApplicationUser")
-                        .WithMany()
+                        .WithMany("Logins")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
@@ -429,76 +201,13 @@ namespace OWolverine.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole")
-                        .WithMany()
+                        .WithMany("Users")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("OWolverine.Models.ApplicationUser")
-                        .WithMany()
+                        .WithMany("Roles")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
-                {
-                    b.HasOne("OWolverine.Models.ApplicationUser")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("OWolverine.Models.Ogame.Alliance", b =>
-                {
-                    b.HasOne("OWolverine.Models.Ogame.Player", "Founder")
-                        .WithOne()
-                        .HasForeignKey("OWolverine.Models.Ogame.Alliance", "FounderId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("OWolverine.Models.Ogame.Universe", "Server")
-                        .WithMany("Alliances")
-                        .HasForeignKey("ServerId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("OWolverine.Models.Ogame.Planet", b =>
-                {
-                    b.HasOne("OWolverine.Models.Ogame.Moon", "Moon")
-                        .WithMany()
-                        .HasForeignKey("MoonId");
-
-                    b.HasOne("OWolverine.Models.Ogame.Player", "Owner")
-                        .WithMany("Planets")
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("OWolverine.Models.Ogame.Universe", "Server")
-                        .WithMany("Planets")
-                        .HasForeignKey("ServerId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("OWolverine.Models.Ogame.Player", b =>
-                {
-                    b.HasOne("OWolverine.Models.Ogame.Alliance", "Alliance")
-                        .WithMany("Members")
-                        .HasForeignKey("AllianceId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("OWolverine.Models.Ogame.Score", "Score")
-                        .WithOne("Player")
-                        .HasForeignKey("OWolverine.Models.Ogame.Player", "ScoreId");
-
-                    b.HasOne("OWolverine.Models.Ogame.Universe", "Server")
-                        .WithMany("Players")
-                        .HasForeignKey("ServerId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("OWolverine.Models.ScoreHistory", b =>
-                {
-                    b.HasOne("OWolverine.Models.Ogame.Score", "Score")
-                        .WithMany("UpdateHistory")
-                        .HasForeignKey("ScoreId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
