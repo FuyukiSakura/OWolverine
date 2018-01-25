@@ -13,6 +13,8 @@
       "launchBrowser": true,
       "launchUrl": "https://localhost:44313/",
       "environmentVariables": {
+        "ENDPOINT_URI": "https://localhost:8081",
+        "PRIMARY_KEY": "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },

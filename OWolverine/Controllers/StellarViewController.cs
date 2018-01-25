@@ -17,6 +17,7 @@ using OWolverine.Services.Ogame;
 using CSharpUtilities;
 using OWolverine.Models.StarMapViewModels;
 using Microsoft.AspNetCore.Http;
+using OWolverine.Services.Cosmos;
 
 namespace OWolverine.Controllers
 {
@@ -55,7 +56,7 @@ namespace OWolverine.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Index()
         {
-            return View();
+            return View(new StarIndexViewModel(new Universe[] { }));
         }
 
         /// <summary>
@@ -107,32 +108,14 @@ namespace OWolverine.Controllers
             return RedirectToAction("Index");
         }
 
-        [HttpPost]
-        public JsonResult GetUser(string server,string playerName)
+        public async Task<IActionResult> UpdateServerList()
         {
-            var player = OgameAPI.FindPlayer(server, playerName);
-            if(player == null)
+            var servers = OgameApi.GetAllUniverses();
+            foreach (var server in servers)
             {
-                return new JsonResult(new Response() { status = APIStatus.Fail, message = "玩家不存在" });
+                await StarMapBLL.CreateServerDocumentIfNotExists(server);
             }
-
-            OgameAPI.FillPlayerData(player);            
-            return new JsonResult(new Response() {
-                status = APIStatus.Success,
-                message = "Returned with data",
-                data = new[] { player.Data }
-            });
-        }
-
-        [HttpGet]
-        public JsonResult GetServers()
-        {
-            var httpClient = new HttpClient();
-            var result = httpClient.GetAsync("https://s101-tw.ogame.gameforge.com/api/universes.xml").Result;
-            var stream = result.Content.ReadAsStreamAsync().Result;
-            var itemXml = XElement.Load(stream);
-            var servers = itemXml.Elements("universe");
-            return new JsonResult(false);
+            return RedirectToAction("Index");
         }
 
         public IActionResult Error()

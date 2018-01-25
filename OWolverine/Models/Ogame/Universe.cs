@@ -1,10 +1,8 @@
 ﻿using CSharpUtilities;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -15,10 +13,11 @@ namespace OWolverine.Models.Ogame
     public class Universe
     {
         //Info
+        [JsonProperty("id")]
+        public string Id => "TW." + ServerId;
         [XmlElement("number")]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Display(Name = "Server ID")]
-        public int Id { get; set; }
+        public int ServerId { get; set; }
         [XmlElement("name")]
         public string Name { get; set; }
         [XmlElement("domain")]
@@ -51,19 +50,21 @@ namespace OWolverine.Models.Ogame
         public bool WreckField { get; set; }
         [XmlElement("globalDeuteriumSaveFactor")]
         public float DeuteriumSaveFactor { get; set; }
+        [XmlElement("probeCargo")]
+        public int ProbeCargo { get; set; }
         [XmlIgnore]
         public DateTime LastUpdate { get; set; }
 
         //Data
         [XmlIgnore]
         public List<Player> Players { get; set; } = new List<Player>();
-        public DateTime? PlayersLastUpdate { get; set; }
+        public DateTime PlayersLastUpdate { get; set; }
         [XmlIgnore]
         public List<Alliance> Alliances { get; set; } = new List<Alliance>();
-        public DateTime? AllianceLastUpdate { get; set; }
+        public DateTime AllianceLastUpdate { get; set; }
         [XmlIgnore]
         public List<Planet> Planets { get; set; } = new List<Planet>();
-        public DateTime? PlanetsLastUpdate { get; set; }
+        public DateTime PlanetsLastUpdate { get; set; }
     }
 
     public class UniverseViewModel
@@ -81,7 +82,7 @@ namespace OWolverine.Models.Ogame
         }
 
         [Display(Name = "Server ID")]
-        public int Id => Universe.Id;
+        public int Id => Universe.ServerId;
         public string Name => Universe.Name;
         [Display(Name = "Active")]
         public int ActivePlayers => Universe.Players.Where(p => p.IsActive).Count();
