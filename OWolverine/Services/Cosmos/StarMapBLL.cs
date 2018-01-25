@@ -1,12 +1,10 @@
 ﻿using Microsoft.Azure.Documents.Client;
 using System;
-using System.Configuration;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using OWolverine.Models.Ogame;
 using Microsoft.Azure.Documents;
 using System.Net;
+using System.Linq;
 
 namespace OWolverine.Services.Cosmos
 {
@@ -38,7 +36,17 @@ namespace OWolverine.Services.Cosmos
                     throw;
                 }
             }
+        }
 
+        /// <summary>
+        /// Get the full server list
+        /// </summary>
+        /// <returns></returns>
+        public static Universe[] GetServerList()
+        {
+            return _client.CreateDocumentQuery<Universe>(
+                UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName),
+                "SELECT c.Name, c.ServerId, c.LastUpdate FROM c").ToArray();
         }
     }
 }

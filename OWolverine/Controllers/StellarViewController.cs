@@ -54,9 +54,9 @@ namespace OWolverine.Controllers
         /// Get server list and random target on Index
         /// </summary>
         /// <returns></returns>
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(new StarIndexViewModel(new Universe[] { }));
+            return View(new StarIndexViewModel(StarMapBLL.GetServerList()));
         }
 
         /// <summary>
