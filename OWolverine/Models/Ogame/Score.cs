@@ -1,6 +1,8 @@
 ﻿using CSharpUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Newtonsoft.Json;
+using OWolverine.Services.Cosmos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,9 +55,25 @@ namespace OWolverine.Models.Ogame
         public int Ships { get; set; }
     }
 
-    // ---------- High Score data ---------- //
+    // ---------- Cosmos ---------- //
+    public class ScoreBoard
+    {
+        [JsonProperty("id")]
+        public string Id => StarMapBLL.GetScoreBoardId(Category, ServerId);
+        public ScoreCategory Category { get; set; }
+        public int ServerId { get; set; }
+        public List<Score> Scores { get; set; }
+        public DateTime LastUpdate { get; set; }
+    }
+
+    // ---------- The real data ---------- //
     public class Score
     {
+        /// <summary>
+        /// The reference ID
+        /// Alliance - Alliance ID
+        /// Player - Player ID
+        /// </summary>
         public int Id { get; set; }
         public int Total { get; set; }
         public int Economy { get; set; }
@@ -67,9 +85,7 @@ namespace OWolverine.Models.Ogame
         public int MilitaryDestroyed { get; set; }
         public int MilitaryLost { get; set; }
         public int Honor { get; set; }
-        public Player Player { get; set; }
-
-        public List<ScoreHistory> UpdateHistory { get; set; } = new List<ScoreHistory>();
+        public List<ScoreHistory> UpdateHistory { get; set; }
         public DateTime LastUpdate { get; set; }
     }
 }

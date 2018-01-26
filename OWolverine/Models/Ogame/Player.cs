@@ -65,6 +65,7 @@ namespace OWolverine.Models.Ogame
         public int AllianceId { get; set; }
         [JsonIgnore]
         public Alliance Alliance { get; set; }
+        [JsonIgnore]
         public Score Score { get; set; }
 
         //Status Property

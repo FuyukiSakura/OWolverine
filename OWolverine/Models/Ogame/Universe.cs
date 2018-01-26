@@ -1,5 +1,6 @@
 ﻿using CSharpUtilities;
 using Newtonsoft.Json;
+using OWolverine.Services.Cosmos;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -14,7 +15,7 @@ namespace OWolverine.Models.Ogame
     {
         //Info
         [JsonProperty("id")]
-        public string Id => "TW." + ServerId;
+        public string Id => StarMapBLL.GetServerId(ServerId);
         [XmlElement("number")]
         [Display(Name = "Server ID")]
         public int ServerId { get; set; }
@@ -52,6 +53,7 @@ namespace OWolverine.Models.Ogame
         public float DeuteriumSaveFactor { get; set; }
         [XmlElement("probeCargo")]
         public int ProbeCargo { get; set; }
+
         [JsonIgnore]
         [XmlAttribute("timestamp")]
         public double Timestamp { get; set; }
@@ -66,34 +68,23 @@ namespace OWolverine.Models.Ogame
         public List<Alliance> Alliances { get; set; } = new List<Alliance>();
         public DateTime AllianceLastUpdate { get; set; }
         public DateTime PlanetsLastUpdate { get; set; }
+        [XmlIgnore]
+        public UniverseStat Statistic { get; set; } = new UniverseStat();
     }
 
-    public class UniverseViewModel
+    public class UniverseStat
     {
-        public Universe Universe { get; set; }
-        public string FeelingLucky { get; set; }
-        private List<DateTime> ServerDates { get; set; } = new List<DateTime>();
-        public UniverseViewModel(Universe server, string playerName)
-        {
-            Universe = server;
-            FeelingLucky = playerName;
-            if (server.PlayersLastUpdate != null) ServerDates.Add(server.PlayersLastUpdate);
-            if (server.AllianceLastUpdate != null) ServerDates.Add(server.AllianceLastUpdate);
-            if (server.PlanetsLastUpdate != null) ServerDates.Add(server.PlanetsLastUpdate);
-        }
-
-        [Display(Name = "Server ID")]
-        public int Id => Universe.ServerId;
-        public string Name => Universe.Name;
         [Display(Name = "Active")]
-        public int ActivePlayers => Universe.Players.Where(p => p.IsActive).Count();
+        public int ActivePlayerCount { get; set; }
+        [Display(Name = "Players")]
+        public int PlayerCount { get; set; }
         [Display(Name = "Moons")]
-        public int CountMoons { get; set; }
+        public int MoonCount { get; set; }
         [Display(Name = "Planets")]
-        public int CountPlanets { get; set; }
+        public int PlanetCount { get; set; }
         [Display(Name = "Map update day")]
-        public string MapUpdateDay => Universe.PlanetsLastUpdate == null ? "" : ((DateTime)Universe.PlanetsLastUpdate).ToString("ddd");
-        [Display(Name = "Last Update (Server time GMT +8)")]
-        public DateTime? LastUpdate => DateTimeHelper.GetLatestDate(ServerDates);
+        public string MapUpdateDay { get; set; }
+        [Display(Name = "Last Update (GMT +8)")]
+        public DateTime LastUpdate { get; set; }
     }
 }

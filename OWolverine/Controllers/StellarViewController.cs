@@ -5,14 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using OWolverine.Models;
-using System.Net.Http;
-using System.Xml.Linq;
-using OWolverine.Models.Utility;
 using OWolverine.Models.Ogame;
-using OgameApiBLL;
 using Microsoft.AspNetCore.Identity;
 using OWolverine.Data;
-using Microsoft.EntityFrameworkCore;
 using OWolverine.Services.Ogame;
 using CSharpUtilities;
 using OWolverine.Models.StarMapViewModels;
@@ -79,7 +74,7 @@ namespace OWolverine.Controllers
             var servers = OgameApi.GetAllUniverses();
             foreach (var server in servers)
             {
-                await StarMapBLL.CreateServerDocumentIfNotExistsAsync(server);
+                await StarMapBLL.CreateUniverseIfNotExistsAsync(server);
             }
             return RedirectToAction("Index");
         }
@@ -124,6 +119,7 @@ namespace OWolverine.Controllers
                 }
             }
             universe.PlanetsLastUpdate = planetList.LastUpdate;
+            universe.Statistic.MapUpdateDay = planetList.LastUpdate.ToString("ddd");
             await StarMapBLL.UpdateServerAsync(universe);
             return RedirectToAction("Index");
         }
@@ -135,26 +131,78 @@ namespace OWolverine.Controllers
         /// <returns></returns>
         public async Task<IActionResult> UpdateScoreBoard(int id)
         {
+            var totalScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Total);
+            var econScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Total);
+            var researchScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Research);
+            var militaryScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Research);
+            var lastUpdate = DateTimeHelper.GetLatestDate(new List<DateTime>
+            {
+                totalScoreData.LastUpdate,
+                econScoreData.LastUpdate,
+                researchScoreData.LastUpdate,
+                militaryScoreData.LastUpdate
+            });
+
+            var scoreBoard = await StarMapBLL.GetScoreBoardAsync(id, ScoreCategory.Player);
+            if (scoreBoard.LastUpdate == lastUpdate) return RedirectToAction("Index"); //Abort if Api not updated
+            // Update total
+            foreach (var scoreData in totalScoreData.Scores)
+            {
+                SetScore(scoreBoard, scoreData.Id, scoreData.Value, ScoreType.Total.ToString(), totalScoreData.LastUpdate);
+            }
+            // Update Economy
+            foreach (var scoreData in econScoreData.Scores)
+            {
+                SetScore(scoreBoard, scoreData.Id, scoreData.Value, ScoreType.Economy.ToString(), econScoreData.LastUpdate);
+            }
+            // Update Research
+            foreach (var scoreData in researchScoreData.Scores)
+            {
+                SetScore(scoreBoard, scoreData.Id, scoreData.Value, ScoreType.Research.ToString(), researchScoreData.LastUpdate);
+            }
+            // Update Military
+            foreach (var scoreData in militaryScoreData.Scores)
+            {
+                SetScore(scoreBoard, scoreData.Id, scoreData.Value, ScoreType.Military.ToString(), militaryScoreData.LastUpdate);
+                SetScore(scoreBoard, scoreData.Id, scoreData.Ships, "ShipNumber", militaryScoreData.LastUpdate);
+            }
+            await StarMapBLL.UpdateScoreBoardAsync(scoreBoard);
             return RedirectToAction("Index");
         }
 
-        /// <summary>
-        /// Generate Score History
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="oldValue"></param>
-        /// <param name="newValue"></param>
-        /// <param name="ApiTime"></param>
-        /// <returns></returns>
-        private ScoreHistory GenerateScoreHistory (ScoreType type, int oldValue, int newValue, DateTime ApiTime)
+        private void SetScore(ScoreBoard scoreBoard, int playerId, int newValue, string type, DateTime lastUpdate)
         {
-            return new ScoreHistory
+            var score = scoreBoard.Scores.FirstOrDefault(s => s.Id == playerId);
+            if (score == null)
             {
-                Type = type.ToString(),
-                OldValue = oldValue,
-                NewValue = newValue,
-                UpdatedAt = ApiTime
-            };
+                //Create new score item if not exists
+                score = new Score()
+                {
+                    Id = playerId,
+                    UpdateHistory = new List<ScoreHistory>()
+                };
+                scoreBoard.Scores.Add(score);
+            }
+
+            //Update score
+            var typeInfo = score.GetType().GetProperty(type.ToString());
+            var value = (int)typeInfo.GetValue(score);
+            if (value != newValue)
+            {
+                //Add history
+                var updateHistory = new ScoreHistory()
+                {
+                    Type = type,
+                    OldValue = score.Total,
+                    NewValue = newValue,
+                    UpdateInterval = lastUpdate - score.LastUpdate,
+                    UpdatedAt = lastUpdate
+                };
+                score.UpdateHistory.Add(updateHistory);
+
+                //Update score
+                typeInfo.SetValue(score, newValue);
+            }
         }
 
         public IActionResult Error()

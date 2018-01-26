@@ -143,16 +143,16 @@
                     @Html.DisplayNameFor(model => model.Servers[0].Name)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Servers[0].Universe.Speed)
+                    @Html.DisplayNameFor(model => model.Servers[0].Speed)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Servers[0].ActivePlayers) / @Html.DisplayNameFor(model => model.Servers[0].Universe.Players)
+                    @Html.DisplayNameFor(model => model.Servers[0].Statistic.ActivePlayerCount) / @Html.DisplayNameFor(model => model.Servers[0].Statistic.PlayerCount)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Servers[0].CountMoons) / @Html.DisplayNameFor(model => model.Servers[0].CountPlanets)
+                    @Html.DisplayNameFor(model => model.Servers[0].Statistic.MoonCount) / @Html.DisplayNameFor(model => model.Servers[0].Statistic.PlanetCount)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Servers[0].MapUpdateDay)
+                    @Html.DisplayNameFor(model => model.Servers[0].Statistic.MapUpdateDay)
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.Servers[0].LastUpdate)
@@ -167,28 +167,28 @@
             {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Id)
+                    @Html.DisplayFor(modelItem => item.ServerId)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Name)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Universe.Speed) / @Html.DisplayFor(modelItem => item.Universe.FleetSpeed)
+                    @Html.DisplayFor(modelItem => item.Speed) / @Html.DisplayFor(modelItem => item.FleetSpeed)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.ActivePlayers) / @Html.DisplayFor(modelItem => item.Universe.Players.Count)
+                    @Html.DisplayFor(modelItem => item.Statistic.PlayerCount) / @Html.DisplayFor(modelItem => item.Statistic.PlanetCount)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.CountMoons) / @Html.DisplayFor(modelItem => item.CountPlanets)
+                    @Html.DisplayFor(modelItem => item.Statistic.MoonCount) / @Html.DisplayFor(modelItem => item.Statistic.PlanetCount)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.MapUpdateDay)
+                    @Html.DisplayFor(modelItem => item.Statistic.MapUpdateDay)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.LastUpdate)
+                    @Html.DisplayFor(modelItem => item.Statistic.LastUpdate)
                 </td>
                 <td>
-                    <a href="/StellarView/UpdateUniverse/@item.Id">Universe</a> / <a href="/StellarView/UpdateScoreBoard/@item.Id">Scoreboard</a>
+                    <a href="/StellarView/UpdateUniverse/@item.ServerId">Universe</a> / <a href="/StellarView/UpdateScoreBoard/@item.ServerId">Scoreboard</a>
                 </td>
             </tr>
             }
