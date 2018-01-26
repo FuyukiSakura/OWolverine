@@ -24,6 +24,12 @@ namespace OWolverine.Models.Ogame
         public DateTime LastUpdate => DateTimeHelper.UnixTimeStampToDateTime(Timestamp);
     }
 
+    public class PlayerId
+    {
+        [XmlAttribute("id")]
+        public int Id { get; set; }
+    }
+
     public class Player : IUpdatable
     {
         [XmlAttribute("id")]

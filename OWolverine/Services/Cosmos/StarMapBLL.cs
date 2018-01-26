@@ -45,7 +45,20 @@ namespace OWolverine.Services.Cosmos
         /// <returns></returns>
         public static async Task<Universe> GetServer(int id)
         {
-            return await _client.ReadDocumentAsync<Universe>(UriFactory.CreateDocumentUri(DatabaseName, CollectionName, "TW."+id));
+            try
+            {
+                return await _client.ReadDocumentAsync<Universe>(UriFactory.CreateDocumentUri(DatabaseName, CollectionName, "TW." + id));
+            }catch(DocumentClientException de)
+            {
+                if (de.StatusCode == HttpStatusCode.NotFound)
+                {
+                    return null;
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
 
         public static async Task UpdateServerAsync(Universe item)

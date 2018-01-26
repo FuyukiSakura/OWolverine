@@ -90,9 +90,19 @@ namespace OWolverine.Controllers
         /// <param name="id"></param>
         public async Task<IActionResult> UpdateUniverse(int id)
         {
-            var players = OgameApi.GetAllPlayers(id);
+            var playerList = OgameApi.GetAllPlayers(id);
+            var allianceList = OgameApi.GetAllAlliances(id);
+
             var universe = await StarMapBLL.GetServer(id);
-            universe.Players = players.Players;
+            if (universe == null) return NotFound(); //Server not found
+
+            //Load Alliance
+            universe.Alliances = allianceList.Alliances;
+            universe.AllianceLastUpdate = allianceList.LastUpdate;
+
+            //Load Players
+            universe.Players = playerList.Players;
+            universe.PlayersLastUpdate = playerList.LastUpdate;
             await StarMapBLL.UpdateServerAsync(universe);
             return RedirectToAction("Index");
         }

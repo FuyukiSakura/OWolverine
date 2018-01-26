@@ -64,12 +64,7 @@ namespace OWolverine.Services.Ogame
         public static AllianceList GetAllAlliances(int serverId)
         {
             var serializer = new XmlSerializer(typeof(AllianceList));
-            var allianceList = ((AllianceList)serializer.Deserialize(RequestAPI(serverId, allianceAPI)));
-            allianceList.Alliances.ForEach(a =>
-            {
-                a.ServerId = serverId;
-            }); //Assign server id
-            return allianceList;
+            return ((AllianceList)serializer.Deserialize(RequestAPI(serverId, allianceAPI)));
         }
 
         /// <summary>
