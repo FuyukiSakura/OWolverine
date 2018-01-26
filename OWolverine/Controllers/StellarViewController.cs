@@ -92,6 +92,7 @@ namespace OWolverine.Controllers
         {
             var playerList = OgameApi.GetAllPlayers(id);
             var allianceList = OgameApi.GetAllAlliances(id);
+            var planetList = OgameApi.GetAllPlanets(id);
 
             var universe = await StarMapBLL.GetServer(id);
             if (universe == null) return NotFound(); //Server not found
@@ -103,6 +104,26 @@ namespace OWolverine.Controllers
             //Load Players
             universe.Players = playerList.Players;
             universe.PlayersLastUpdate = playerList.LastUpdate;
+
+            //Load Planets
+            foreach(var planet in planetList.Planets)
+            {
+                var owner = universe.Players.FirstOrDefault(p => p.Id == planet.OwnerId);
+                if (owner == null) continue; //Ignore if owner not in player list
+
+                var playerPlanet = owner.Planets.FirstOrDefault(pn => pn.Id == planet.Id);
+                if(playerPlanet == null)
+                {
+                    //Add if not exist
+                    owner.Planets.Add(planet);
+                }
+                else
+                {
+                    //Update if found
+                    playerPlanet.Update(planet);
+                }
+            }
+            universe.PlanetsLastUpdate = planetList.LastUpdate;
             await StarMapBLL.UpdateServerAsync(universe);
             return RedirectToAction("Index");
         }

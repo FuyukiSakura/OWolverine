@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CSharpUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Newtonsoft.Json;
 using OWolverine.Models.Database;
 using System;
 using System.Collections.Generic;
@@ -17,25 +19,25 @@ namespace OWolverine.Models.Ogame
         [XmlElement("planet")]
         public List<Planet> Planets { get; set; }
         [XmlAttribute("timestamp")]
-        public double LastUpdate { get; set; }
+        public double Timestamp { get; set; }
+        [XmlIgnore]
+        public DateTime LastUpdate => DateTimeHelper.UnixTimeStampToDateTime(Timestamp);
     }
 
     [Serializable()]
     [XmlRoot(ElementName = "planet")]
     public class Planet : IUpdatable
     {
-        public int Id { get; set; }
         [XmlAttribute("id")]
-        public int PlanetId { get; set; }
+        public int Id { get; set; }
         [XmlAttribute("name")]
         public string Name { get; set; }
         [XmlElement("moon")]
         public Moon Moon { get; set; }
-
-        [NotMapped]
         public Coordinate Coords { get; set; } = new Coordinate();
         [XmlAttribute("coords")]
         [Display(Name = "Coordinates")]
+        [JsonIgnore]
         public string Coord {
             get {
                 return String.Format("{0}:{1}:{2}", Coords.Galaxy, Coords.System, Coords.Location);
@@ -47,14 +49,10 @@ namespace OWolverine.Models.Ogame
                 Coords.Location = Convert.ToInt32(arr[2]);
             }
         }
-
         [XmlAttribute("player")]
         public int OwnerId { get; set; }
-        [XmlIgnore]
+        [JsonIgnore]
         public Player Owner { get; set; }
-
-        public int ServerId { get; set; }
-        public Universe Server { get; set; }
         public DateTime LastUpdated { get; set; }
 
         public void Update(IUpdatable obj)
@@ -83,9 +81,9 @@ namespace OWolverine.Models.Ogame
         public int Galaxy { get; set; }
         public int System { get; set; }
         public int Location { get; set; }
-        [NotMapped]
+        [JsonIgnore]
         public bool IsEmpty => Galaxy == 0 && System == 0 && Location == 0;
-        [NotMapped]
+        [JsonIgnore]
         public bool IsAddress => Galaxy != 0 && System != 0 && Location != 0;
         public bool IsEqual(Coordinate coord)
         {
@@ -95,6 +93,7 @@ namespace OWolverine.Models.Ogame
 
     public class Moon : IUpdatable
     {
+        [XmlAttribute("id")]
         public int Id { get; set; }
         [XmlAttribute("name")]
         public string Name { get; set; }

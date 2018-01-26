@@ -75,12 +75,7 @@ namespace OWolverine.Services.Ogame
         public static PlanetList GetAllPlanets(int serverId)
         {
             var serializer = new XmlSerializer(typeof(PlanetList));
-            var planetList = ((PlanetList)serializer.Deserialize(RequestAPI(serverId, universeAPI)));
-            planetList.Planets.ForEach(a =>
-            {
-                a.ServerId = serverId;
-            }); //Assign server id
-            return planetList;
+            return ((PlanetList)serializer.Deserialize(RequestAPI(serverId, universeAPI)));
         }
 
         /// <summary>
