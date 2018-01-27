@@ -37,17 +37,16 @@ namespace OWolverine.Models.Ogame
         [XmlAttribute("name")]
         public string Name { get; set; }
         [XmlAttribute("status")]
-        [JsonIgnore]
         public string Status {
             get
             {
                 string statusText = "";
-                if (IsAdmin) statusText += "a ";
-                if (IsFlee) statusText += "o ";
-                if (IsVocation) statusText += "v ";
-                if (IsBanned) statusText += "b ";
-                if (IsInactive && !IsLeft) statusText += "i ";
-                if (IsLeft) statusText += "I ";
+                if (IsAdmin) statusText += "a";
+                if (IsFlee) statusText += "o";
+                if (IsVocation) statusText += "v";
+                if (IsBanned) statusText += "b";
+                if (IsInactive && !IsLeft) statusText += "i";
+                if (IsLeft) statusText += "I";
                 return statusText;
             }
             set
@@ -69,13 +68,20 @@ namespace OWolverine.Models.Ogame
         public Score Score { get; set; } = new Score();
 
         //Status Property
+        [JsonIgnore]
         public bool IsAdmin { get; set; }
+        [JsonIgnore]
         public bool IsBanned { get; set; }
+        [JsonIgnore]
         public bool IsFlee { get; set; }
+        [JsonIgnore]
         public bool IsVocation { get; set; }
+        [JsonIgnore]
         public bool IsInactive { get; set; }
+        [JsonIgnore]
         public bool IsLeft { get; set; }
         [NotMapped]
+        [JsonIgnore]
         public bool IsActive
         {
             get
@@ -117,7 +123,7 @@ namespace OWolverine.Models.Ogame
         public Alliance Alliance => _player.Alliance;
         public List<Planet> Planets => _player.Planets;
         //Status
-        public string StatusText => HasStatus ? $"(Status: {_player.Status})":"";
+        public string StatusText => HasStatus ? $"(Status: {String.Join(" ", _player.Status.AsEnumerable())})":"";
         public bool HasStatus => _player.Status != "";
         //Score Total
         public int ScoreTotal => _player.Score.Total;
