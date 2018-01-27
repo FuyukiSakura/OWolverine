@@ -76,12 +76,24 @@ namespace OWolverine.Controllers
             if (ModelState.IsValid)
             {
                 sivm.IsSearch = true;
+
+                //Search player
                 var status = "";
                 if (vm.PlayerStatus.IsBanned) status += "b";
                 if (vm.PlayerStatus.IsFlee) status += "o";
                 if (vm.PlayerStatus.IsInactive && !vm.PlayerStatus.IsLeft) status += "i";
                 if (vm.PlayerStatus.IsLeft) status += "I";
-                sivm.AssignPlayers(StarMapBLL.SearchPlayerByName(vm.PlayerName ?? "", vm.ServerId, status));
+                var players = StarMapBLL.SearchPlayerByName(vm.PlayerName ?? "", vm.ServerId, status);
+
+                if (!vm.Coords.IsEmpty)
+                {
+                    //Search by coordinate
+                    var planets = StarMapBLL.SearchPlanetsByCoordinate(vm.Coords, vm.ServerId, vm.Range);
+                    sivm.Planets = planets;
+                    var planetIds = planets.Select(pn => pn.Id).ToArray();
+                    players.RemoveAll(p => !p.Planets.Any(pn => planetIds.Contains(pn.Id)));
+                }
+                sivm.AssignPlayers(players);
             }
             return View("Index", sivm);
         }

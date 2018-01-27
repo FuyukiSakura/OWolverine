@@ -83,6 +83,36 @@ namespace OWolverine.Services.Cosmos
                 $"c.LastUpdate FROM c WHERE SUBSTRING(c.id, 0, {ServerPrefix.Length}) = '{ServerPrefix}'").ToArray();
         }
 
+        // ##### Planets
+        /// <summary>
+        /// Search planet by coordinate given range
+        /// </summary>
+        /// <param name="coords"></param>
+        /// <param name="serverId"></param>
+        /// <param name="range"></param>
+        /// <returns></returns>
+        public static List<Planet> SearchPlanetsByCoordinate(Coordinate coords, int serverId, int range)
+        {
+            var queryString = $"SELECT VALUE planet FROM c JOIN p IN c.Players JOIN planet IN p.Planets JOIN planet.Coords crd WHERE c.id = '{GetServerId(serverId)}' ";
+            if (coords.Galaxy != 0)
+            {
+                queryString += $"AND crd.Galaxy = {coords.Galaxy} ";
+            }
+            if (coords.System != 0)
+            {
+                var minSys = coords.System - range;
+                var maxSys = coords.System + range;
+                queryString += $"AND (crd.System BETWEEN {minSys} AND {maxSys}) ";
+            }
+            if (coords.Location != 0)
+            {
+                queryString += $"AND crd.Location = {coords.Location}";
+            }
+            return _client.CreateDocumentQuery<Planet>(
+                UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName),
+                queryString).ToList();
+        }
+
         // ##### Players
         /// <summary>
         /// Search player by given name and server
