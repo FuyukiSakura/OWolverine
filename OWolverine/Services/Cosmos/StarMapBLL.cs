@@ -87,12 +87,7 @@ namespace OWolverine.Services.Cosmos
         public static List<Player> SearchPlayer(StarSearchViewModel vm)
         {
             //Search player name
-            var players = _client.CreateDocumentQuery<Universe>(
-                UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName))
-                .Where(u => u.ServerId == vm.ServerId)
-                .SelectMany(u => u.Players)
-                .Where(p => p.Name.ToLower().Contains(vm.PlayerName.ToLower()))
-                .ToList();
+            var players = SearchPlayerByName(vm.PlayerName, vm.ServerId);
 
             //Search score info
             var playerIds = players.Select(p => p.Id).ToArray();
@@ -113,6 +108,32 @@ namespace OWolverine.Services.Cosmos
                 }
             }
             return players;
+        }
+
+        /// <summary>
+        /// Search player by given name and server
+        /// If serverId not given (or -1), search all servers
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="serverId"></param>
+        /// <param name="caseSensitive"></param>
+        /// <param name="strict"></param>
+        /// <returns></returns>
+        public static List<Player> SearchPlayerByName(string name, int serverId = -1, bool caseSensitive = false, bool strict = false)
+        {
+            var query = _client.CreateDocumentQuery<Universe>(
+                UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName))
+                .Where(u => serverId == -1 ? u.Id.Contains(ServerPrefix) : u.Id == GetServerId(serverId))
+                .SelectMany(u => u.Players);
+            if (strict)
+            {
+                return query.Where(p => p.Name == name).ToList();
+            }
+            else if (caseSensitive)
+            {
+                return query.Where(p => p.Name.Contains(name)).ToList();
+            }
+            return query.Where(p => p.Name.ToLower().Contains(name.ToLower())).ToList();
         }
 
         // ##### Scores
