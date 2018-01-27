@@ -72,25 +72,7 @@ namespace OWolverine.Controllers
             if (ModelState.IsValid)
             {
                 sivm.IsSearch = true;
-                //Search player name
-                var players = StarMapBLL.SearchPlayerByName(vm.PlayerName, vm.ServerId);
-
-                //Search score info
-                var scoreDocumnet = StarMapBLL.GetScoreByIds(vm.ServerId, players.Select(p => p.Id).ToArray());
-                foreach (var player in players)
-                {
-                    //Populate score info
-                    var score = scoreDocumnet.FirstOrDefault(s => s.Id == player.Id);
-                    if (score != null)
-                    {
-                        score.UpdateHistory = score.UpdateHistory
-                            .GroupBy(h => h.Type)
-                            .Select(g => g.OrderByDescending(h => h.UpdatedAt).First()).ToList();
-                        player.Score = score;
-                    }
-                }
-
-                sivm.AssignPlayers(players);
+                sivm.AssignPlayers(StarMapBLL.SearchPlayerByName(vm.PlayerName, vm.ServerId));
             }
             return View("Index", sivm);
         }

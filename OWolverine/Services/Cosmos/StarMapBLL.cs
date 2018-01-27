@@ -99,15 +99,35 @@ namespace OWolverine.Services.Cosmos
                 UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName))
                 .Where(u => serverId == -1 ? u.Id.Contains(ServerPrefix) : u.Id == GetServerId(serverId))
                 .SelectMany(u => u.Players);
+
+            List<Player> players;
             if (strict)
             {
-                return query.Where(p => p.Name == name).ToList();
+                players = query.Where(p => p.Name == name).ToList();
             }
             else if (caseSensitive)
             {
-                return query.Where(p => p.Name.Contains(name)).ToList();
+                players = query.Where(p => p.Name.Contains(name)).ToList();
             }
-            return query.Where(p => p.Name.ToLower().Contains(name.ToLower())).ToList();
+            else
+            {
+                players = query.Where(p => p.Name.ToLower().Contains(name.ToLower())).ToList();
+            }
+
+            var scoreDocumnet = GetScoreByIds(serverId, players.Select(p => p.Id).ToArray());
+            foreach (var player in players)
+            {
+                //Populate score info
+                var score = scoreDocumnet.FirstOrDefault(s => s.Id == player.Id);
+                if (score != null)
+                {
+                    score.UpdateHistory = score.UpdateHistory
+                        .GroupBy(h => h.Type)
+                        .Select(g => g.OrderByDescending(h => h.UpdatedAt).First()).ToList();
+                    player.Score = score;
+                }
+            }
+            return players;
         }
 
         // ##### Scores

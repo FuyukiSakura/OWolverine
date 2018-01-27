@@ -85,7 +85,7 @@ namespace OWolverine.Models.Ogame
         public int MilitaryDestroyed { get; set; }
         public int MilitaryLost { get; set; }
         public int Honor { get; set; }
-        public List<ScoreHistory> UpdateHistory { get; set; }
+        public List<ScoreHistory> UpdateHistory { get; set; } = new List<ScoreHistory>();
         public DateTime LastUpdate { get; set; }
     }
 }
