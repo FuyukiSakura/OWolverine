@@ -93,27 +93,33 @@ namespace OWolverine.Services.Cosmos
         /// <param name="caseSensitive"></param>
         /// <param name="strict"></param>
         /// <returns></returns>
-        public static List<Player> SearchPlayerByName(string name, int serverId = -1, bool caseSensitive = false, bool strict = false)
+        public static List<Player> SearchPlayerByName(string name, int serverId = -1, string status = "", bool caseSensitive = false, bool strict = false)
         {
             var query = _client.CreateDocumentQuery<Universe>(
                 UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName))
                 .Where(u => serverId == -1 ? u.Id.Contains(ServerPrefix) : u.Id == GetServerId(serverId))
                 .SelectMany(u => u.Players);
 
-            List<Player> players;
             if (strict)
             {
-                players = query.Where(p => p.Name == name).ToList();
+                query = query.Where(p => p.Name == name);
             }
             else if (caseSensitive)
             {
-                players = query.Where(p => p.Name.Contains(name)).ToList();
+                query = query.Where(p => p.Name.Contains(name));
             }
             else
             {
-                players = query.Where(p => p.Name.ToLower().Contains(name.ToLower())).ToList();
+                query = query.Where(p => p.Name.ToLower().Contains(name.ToLower()));
+            }
+            
+            foreach(var c in status)
+            {
+                //Mark all status
+                query = query.Where(p => p.Status.Contains(c));
             }
 
+            var players = query.ToList();
             var scoreDocumnet = GetScoreByIds(serverId, players.Select(p => p.Id).ToArray());
             foreach (var player in players)
             {

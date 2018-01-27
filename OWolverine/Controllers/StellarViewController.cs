@@ -76,7 +76,12 @@ namespace OWolverine.Controllers
             if (ModelState.IsValid)
             {
                 sivm.IsSearch = true;
-                sivm.AssignPlayers(StarMapBLL.SearchPlayerByName(vm.PlayerName ?? "", vm.ServerId));
+                var status = "";
+                if (vm.PlayerStatus.IsBanned) status += "b";
+                if (vm.PlayerStatus.IsFlee) status += "o";
+                if (vm.PlayerStatus.IsInactive && !vm.PlayerStatus.IsLeft) status += "i";
+                if (vm.PlayerStatus.IsLeft) status += "I";
+                sivm.AssignPlayers(StarMapBLL.SearchPlayerByName(vm.PlayerName ?? "", vm.ServerId, status));
             }
             return View("Index", sivm);
         }
