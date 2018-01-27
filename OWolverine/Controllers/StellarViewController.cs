@@ -131,6 +131,18 @@ namespace OWolverine.Controllers
                 }
             }
             universe.PlanetsLastUpdate = planetList.LastUpdate;
+
+            //Update statistic
+            universe.Statistic.PlayerCount = universe.Players.Count;
+            universe.Statistic.ActivePlayerCount = universe.Players.Where(p => p.IsActive).Count();
+            universe.Statistic.PlanetCount = planetList.Planets.Count;
+            universe.Statistic.MoonCount = planetList.Planets.Where(p => p.Moon != null).Count();
+            universe.Statistic.LastUpdate = DateTimeHelper.GetLatestDate(new List<DateTime>
+            {
+                planetList.LastUpdate,
+                allianceList.LastUpdate,
+                planetList.LastUpdate
+            });
             universe.Statistic.MapUpdateDay = planetList.LastUpdate.ToString("ddd");
             await StarMapBLL.UpdateServerAsync(universe);
             return RedirectToAction("Index");
