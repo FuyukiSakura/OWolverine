@@ -90,14 +90,10 @@ namespace OWolverine.Services.Cosmos
             var players = SearchPlayerByName(vm.PlayerName, vm.ServerId);
 
             //Search score info
-            var playerIds = players.Select(p => p.Id).ToArray();
-            var scoreDocumnet = _client.CreateDocumentQuery<ScoreBoard>(
-                UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName))
-                .Where(sb => sb.Id == GetScoreBoardId(ScoreCategory.Player, vm.ServerId))
-                .SelectMany(sb => sb.Scores)
-                .Where(s => playerIds.Contains(s.Id)).ToArray();
+            var scoreDocumnet = GetScoreByIds(vm.ServerId, players.Select(p => p.Id).ToArray());
             foreach(var player in players)
             {
+                //Populate score info
                 var score = scoreDocumnet.FirstOrDefault(s => s.Id == player.Id);
                 if(score != null)
                 {
@@ -188,6 +184,21 @@ namespace OWolverine.Services.Cosmos
                     throw;
                 }
             }
+        }
+
+        /// <summary>
+        /// Get score by player Ids and server id
+        /// </summary>
+        /// <param name="serverId"></param>
+        /// <param name="playerIds"></param>
+        /// <returns></returns>
+        public static Score[] GetScoreByIds(int serverId, int[] playerIds)
+        {
+            return _client.CreateDocumentQuery<ScoreBoard>(
+                UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName))
+                .Where(sb => sb.Id == GetScoreBoardId(ScoreCategory.Player, serverId))
+                .SelectMany(sb => sb.Scores)
+                .Where(s => playerIds.Contains(s.Id)).ToArray();
         }
 
         /* ---------- Private Helper function ---------- */
