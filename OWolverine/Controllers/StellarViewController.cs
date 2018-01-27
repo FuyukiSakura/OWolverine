@@ -51,7 +51,12 @@ namespace OWolverine.Controllers
         /// <returns></returns>
         public IActionResult Index()
         {
-            return View(new StarIndexViewModel(StarMapBLL.GetServerList()));
+            var vm = new StarIndexViewModel(StarMapBLL.GetServerList());
+            var userServerPreference = HttpContext.Session.GetInt32(SessionServerSelection);
+            if (userServerPreference != null) {
+                vm.SearchViewModel.ServerId = (int)userServerPreference;
+            }
+            return View(vm);
         }
 
         /// <summary>
@@ -62,7 +67,14 @@ namespace OWolverine.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Search(StarSearchViewModel vm)
         {
-            return View("Index");
+            var sivm = new StarIndexViewModel(StarMapBLL.GetServerList());
+            HttpContext.Session.SetInt32(SessionServerSelection, vm.ServerId); //Remember option
+            if (ModelState.IsValid)
+            {
+                sivm.IsSearch = true;
+                sivm.AssignPlayers(StarMapBLL.SearchPlayer(vm));
+            }
+            return View("Index", sivm);
         }
 
         /// <summary>

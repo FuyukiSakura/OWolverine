@@ -1,11 +1,13 @@
 ﻿using Microsoft.Azure.Documents.Client;
 using System;
 using System.Threading.Tasks;
+using CSharpUtilities;
 using OWolverine.Models.Ogame;
 using Microsoft.Azure.Documents;
 using System.Net;
 using System.Linq;
 using System.Collections.Generic;
+using OWolverine.Models.StarMapViewModels;
 
 namespace OWolverine.Services.Cosmos
 {
@@ -79,6 +81,36 @@ namespace OWolverine.Services.Cosmos
                 "c.ActivePlayerCount, c.PlayerCount, c.MoonCount, c.PlanetCount, " +
                 "c.PlayersLastUpdate, c.AllianceLastUpdate, c.PlanetsLastUpdate, " +
                 $"c.LastUpdate FROM c WHERE SUBSTRING(c.id, 0, {ServerPrefix.Length}) = '{ServerPrefix}'").ToArray();
+        }
+
+        // ##### Players
+        public static List<Player> SearchPlayer(StarSearchViewModel vm)
+        {
+            var universeDocument = _client.CreateDocumentQuery<Universe>(
+                UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName))
+                .Where(u => u.ServerId == vm.ServerId)
+                .SelectMany(u => u.Players)
+                .ToArray();
+
+            var players = universeDocument
+                .Where(p => p.Name.Contains(vm.PlayerName, StringComparison.OrdinalIgnoreCase)).ToList();
+            var playerIds = players.Select(p => p.Id).ToArray();
+
+            var scoreDocumnet = _client.CreateDocumentQuery<ScoreBoard>(
+                UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName))
+                .Where(sb => sb.Id == GetScoreBoardId(ScoreCategory.Player, vm.ServerId))
+                .SelectMany(sb => sb.Scores)
+                .Where(s => playerIds.Contains(s.Id)).ToArray();
+
+            foreach(var player in players)
+            {
+                var score = scoreDocumnet.FirstOrDefault(s => s.Id == player.Id);
+                if(score != null)
+                {
+                    player.Score = score;
+                }
+            }
+            return players;
         }
 
         // ##### Scores
