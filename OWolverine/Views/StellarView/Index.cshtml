@@ -83,7 +83,7 @@
                             | Ship Score:  @player.ScoreShip <span style="color:@(player.ScoreShipDiff > 0 ? "#00B300":"red")">(@(player.ScoreShipDiff > 0 ? "+" : "")@player.ScoreShipDiff)</span>
                             | Ships: @player.ShipNumber
                             | Player Style: @player.Style
-                            <span class="pull-right">Snapshot time: @(player.SnapshotDiff) | Last update: @(player.LastUpdate)</span>
+                            <span class="pull-right">Snapshot: @(player.SnapshotDiff) | Last Action: @(player.LastAction)</span>
                         </a>
                     </h4>
                 </div>

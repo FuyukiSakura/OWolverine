@@ -198,7 +198,20 @@ namespace OWolverine.Models.Ogame
                 return "Turtle";
             }
         }
-        public string LastUpdate => _player.LastUpdate.ToString("g");
+        public string LastAction {
+            get
+            {
+                var history = _player.Score.UpdateHistory.FirstOrDefault(h => h.Type == ScoreType.Total.ToString());
+                if (history == null)
+                {
+                    return _player.Score.LastUpdate.ToString("g");
+                }
+                var diff = _player.Score.LastUpdate - history.UpdatedAt;
+                return String.Format("{0} {1}",
+                    diff.Days == 0 ? "" : String.Format("{0} Day{1}", diff.Days, diff.Days > 1 ? "s" : ""),
+                    String.Format("{0} Hour{1}", diff.Hours, diff.Hours > 1 ? "s" : ""));
+            }
+        }
 
         public PlayerViewModel(Player player)
         {
