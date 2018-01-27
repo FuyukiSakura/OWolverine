@@ -87,13 +87,12 @@ namespace OWolverine.Services.Cosmos
         public static List<Player> SearchPlayer(StarSearchViewModel vm)
         {
             //Search player name
-            var universeDocument = _client.CreateDocumentQuery<Universe>(
+            var players = _client.CreateDocumentQuery<Universe>(
                 UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName))
                 .Where(u => u.ServerId == vm.ServerId)
                 .SelectMany(u => u.Players)
-                .ToArray();
-            var players = universeDocument
-                .Where(p => p.Name.Contains(vm.PlayerName, StringComparison.OrdinalIgnoreCase)).ToList();
+                .Where(p => p.Name.ToLower().Contains(vm.PlayerName.ToLower()))
+                .ToList();
 
             //Search score info
             var playerIds = players.Select(p => p.Id).ToArray();
