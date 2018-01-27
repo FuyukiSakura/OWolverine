@@ -166,6 +166,22 @@ namespace OWolverine.Services.Cosmos
             return players;
         }
 
+        /// <summary>
+        /// Search all players that owns a planet of the given ID
+        /// </summary>
+        /// <param name="serverId"></param>
+        /// <param name="planetIds"></param>
+        /// <returns></returns>
+        public static Player SearchPlayerById(int serverId, int playerId)
+        {
+            return _client.CreateDocumentQuery<Universe>(
+                UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName))
+                .Where(u => serverId == -1 ? u.Id.Contains(ServerPrefix) : u.Id == GetServerId(serverId))
+                .SelectMany(u => u.Players)
+                .Where(p => p.Id == playerId)
+                .ToArray()[0];
+        }
+
         // ##### Scores
         /// <summary>
         /// Create new score document for player

@@ -83,15 +83,37 @@ namespace OWolverine.Controllers
                 if (vm.PlayerStatus.IsFlee) status += "o";
                 if (vm.PlayerStatus.IsInactive && !vm.PlayerStatus.IsLeft) status += "i";
                 if (vm.PlayerStatus.IsLeft) status += "I";
-                var players = StarMapBLL.SearchPlayerByName(vm.PlayerName ?? "", vm.ServerId, status);
 
+                List<Player> players = new List<Player>();
                 if (!vm.Coords.IsEmpty)
                 {
                     //Search by coordinate
                     var planets = StarMapBLL.SearchPlanetsByCoordinate(vm.Coords, vm.ServerId, vm.Range);
+                    foreach(var planet in planets)
+                    {
+                        var player = players.FirstOrDefault(p => p.Id == planet.OwnerId);
+                        if (player != null)
+                        {
+                            //Player exists in list
+                            planet.Owner = player; //Assign to planet
+                            continue;
+                        }
+
+                        //Find all owners in range
+                        var owner = StarMapBLL.SearchPlayerById(vm.ServerId, planet.OwnerId);
+                        if (owner != null)
+                        {
+                            //Owner found in DB and is new
+                            players.Add(StarMapBLL.SearchPlayerById(vm.ServerId, planet.OwnerId));
+                            planet.Owner = owner;
+                        }
+                    }
                     sivm.Planets = planets;
-                    var planetIds = planets.Select(pn => pn.Id).ToArray();
-                    players.RemoveAll(p => !p.Planets.Any(pn => planetIds.Contains(pn.Id)));
+                }
+                else
+                {
+                    //Name only search
+                    players.AddRange(StarMapBLL.SearchPlayerByName(vm.PlayerName ?? "", vm.ServerId, status));
                 }
                 sivm.AssignPlayers(players);
             }
