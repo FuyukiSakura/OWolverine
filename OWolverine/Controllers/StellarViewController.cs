@@ -72,7 +72,7 @@ namespace OWolverine.Controllers
             if (ModelState.IsValid)
             {
                 sivm.IsSearch = true;
-                sivm.AssignPlayers(StarMapBLL.SearchPlayerByName(vm.PlayerName, vm.ServerId));
+                sivm.AssignPlayers(StarMapBLL.SearchPlayerByName(vm.PlayerName ?? "", vm.ServerId));
             }
             return View("Index", sivm);
         }
