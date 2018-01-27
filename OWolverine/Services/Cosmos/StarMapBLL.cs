@@ -84,28 +84,6 @@ namespace OWolverine.Services.Cosmos
         }
 
         // ##### Players
-        public static List<Player> SearchPlayer(StarSearchViewModel vm)
-        {
-            //Search player name
-            var players = SearchPlayerByName(vm.PlayerName, vm.ServerId);
-
-            //Search score info
-            var scoreDocumnet = GetScoreByIds(vm.ServerId, players.Select(p => p.Id).ToArray());
-            foreach(var player in players)
-            {
-                //Populate score info
-                var score = scoreDocumnet.FirstOrDefault(s => s.Id == player.Id);
-                if(score != null)
-                {
-                    score.UpdateHistory = score.UpdateHistory
-                        .GroupBy(h => h.Type)
-                        .Select(g => g.OrderByDescending(h => h.UpdatedAt).First()).ToList();
-                    player.Score = score;
-                }
-            }
-            return players;
-        }
-
         /// <summary>
         /// Search player by given name and server
         /// If serverId not given (or -1), search all servers

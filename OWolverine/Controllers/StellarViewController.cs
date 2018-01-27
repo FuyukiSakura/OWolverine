@@ -72,7 +72,25 @@ namespace OWolverine.Controllers
             if (ModelState.IsValid)
             {
                 sivm.IsSearch = true;
-                sivm.AssignPlayers(StarMapBLL.SearchPlayer(vm));
+                //Search player name
+                var players = StarMapBLL.SearchPlayerByName(vm.PlayerName, vm.ServerId);
+
+                //Search score info
+                var scoreDocumnet = StarMapBLL.GetScoreByIds(vm.ServerId, players.Select(p => p.Id).ToArray());
+                foreach (var player in players)
+                {
+                    //Populate score info
+                    var score = scoreDocumnet.FirstOrDefault(s => s.Id == player.Id);
+                    if (score != null)
+                    {
+                        score.UpdateHistory = score.UpdateHistory
+                            .GroupBy(h => h.Type)
+                            .Select(g => g.OrderByDescending(h => h.UpdatedAt).First()).ToList();
+                        player.Score = score;
+                    }
+                }
+
+                sivm.AssignPlayers(players);
             }
             return View("Index", sivm);
         }
@@ -190,7 +208,7 @@ namespace OWolverine.Controllers
                 SetScore(scoreBoard, scoreData.Id, scoreData.Value, ScoreType.Military.ToString(), militaryScoreData.LastUpdate);
                 SetScore(scoreBoard, scoreData.Id, scoreData.Ships, "ShipNumber", militaryScoreData.LastUpdate);
             }
-            
+            //Calculate Ship score
             await StarMapBLL.UpdateScoreBoardAsync(scoreBoard);
             return RedirectToAction("Index");
         }
