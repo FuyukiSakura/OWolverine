@@ -65,7 +65,7 @@ namespace OWolverine.Controllers
         /// <param name="vm"></param>
         /// <returns></returns>
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Search(StarSearchViewModel vm)
+        public IActionResult Search(StarSearchViewModel vm)
         {
             var sivm = new StarIndexViewModel(StarMapBLL.GetServerList());
             HttpContext.Session.SetInt32(SessionServerSelection, vm.ServerId); //Remember option
@@ -178,6 +178,7 @@ namespace OWolverine.Controllers
                 SetScore(scoreBoard, scoreData.Id, scoreData.Value, ScoreType.Military.ToString(), militaryScoreData.LastUpdate);
                 SetScore(scoreBoard, scoreData.Id, scoreData.Ships, "ShipNumber", militaryScoreData.LastUpdate);
             }
+            
             await StarMapBLL.UpdateScoreBoardAsync(scoreBoard);
             return RedirectToAction("Index");
         }
@@ -205,7 +206,7 @@ namespace OWolverine.Controllers
                 var updateHistory = new ScoreHistory()
                 {
                     Type = type,
-                    OldValue = score.Total,
+                    OldValue = value,
                     NewValue = newValue,
                     UpdateInterval = lastUpdate - score.LastUpdate,
                     UpdatedAt = lastUpdate
@@ -214,6 +215,12 @@ namespace OWolverine.Controllers
 
                 //Update score
                 typeInfo.SetValue(score, newValue);
+            }
+
+            //Update score update time
+            if(score.LastUpdate < lastUpdate)
+            {
+                score.LastUpdate = lastUpdate;
             }
         }
 

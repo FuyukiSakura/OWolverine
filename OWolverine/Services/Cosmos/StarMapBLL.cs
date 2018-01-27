@@ -77,7 +77,7 @@ namespace OWolverine.Services.Cosmos
         {
             return _client.CreateDocumentQuery<Universe>(
                 UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName),
-                "SELECT c.ServerId, c.Name, " +
+                "SELECT c.ServerId, c.Name, c.Speed, c.FleetSpeed, c.Statistic, " +
                 "c.ActivePlayerCount, c.PlayerCount, c.MoonCount, c.PlanetCount, " +
                 "c.PlayersLastUpdate, c.AllianceLastUpdate, c.PlanetsLastUpdate, " +
                 $"c.LastUpdate FROM c WHERE SUBSTRING(c.id, 0, {ServerPrefix.Length}) = '{ServerPrefix}'").ToArray();
