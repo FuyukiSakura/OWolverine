@@ -86,27 +86,30 @@ namespace OWolverine.Services.Cosmos
         // ##### Players
         public static List<Player> SearchPlayer(StarSearchViewModel vm)
         {
+            //Search player name
             var universeDocument = _client.CreateDocumentQuery<Universe>(
                 UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName))
                 .Where(u => u.ServerId == vm.ServerId)
                 .SelectMany(u => u.Players)
                 .ToArray();
-
             var players = universeDocument
                 .Where(p => p.Name.Contains(vm.PlayerName, StringComparison.OrdinalIgnoreCase)).ToList();
-            var playerIds = players.Select(p => p.Id).ToArray();
 
+            //Search score info
+            var playerIds = players.Select(p => p.Id).ToArray();
             var scoreDocumnet = _client.CreateDocumentQuery<ScoreBoard>(
                 UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName))
                 .Where(sb => sb.Id == GetScoreBoardId(ScoreCategory.Player, vm.ServerId))
                 .SelectMany(sb => sb.Scores)
                 .Where(s => playerIds.Contains(s.Id)).ToArray();
-
             foreach(var player in players)
             {
                 var score = scoreDocumnet.FirstOrDefault(s => s.Id == player.Id);
                 if(score != null)
                 {
+                    score.UpdateHistory = score.UpdateHistory
+                        .GroupBy(h => h.Type)
+                        .Select(g => g.OrderByDescending(h => h.UpdatedAt).First()).ToList();
                     player.Score = score;
                 }
             }

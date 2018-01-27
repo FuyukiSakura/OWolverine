@@ -166,21 +166,9 @@ namespace OWolverine.Models.Ogame
             get
             {
                 var historyTotal = _player.Score.UpdateHistory
-                    .Where(h => h.Type == ScoreType.Total.ToString())
-                    .OrderByDescending(h => h.UpdatedAt)
-                    .ToArray();
-                TimeSpan diff;
-                if (historyTotal.Length <= 0)
-                {
-                    diff = DateTime.UtcNow - _player.LastUpdate;
-                } else if (historyTotal.Length == 1)
-                {
-                    diff = _player.Score.LastUpdate - historyTotal[0].UpdatedAt;
-                }
-                else
-                {
-                    diff = historyTotal[0].UpdatedAt - historyTotal[1].UpdatedAt;
-                }
+                    .FirstOrDefault(h => h.Type == ScoreType.Total.ToString());
+                if (historyTotal == null) return "N/A"; //No history info
+                var diff = historyTotal.UpdateInterval;
                 return String.Format("{0} {1}",
                     diff.Days == 0 ? "" : String.Format("{0} Day{1}", diff.Days, diff.Days > 1 ? "s" : ""),
                     String.Format("{0} Hour{1}", diff.Hours, diff.Hours > 1 ? "s" : ""));
