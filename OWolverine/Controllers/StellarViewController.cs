@@ -67,7 +67,11 @@ namespace OWolverine.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Search(StarSearchViewModel vm)
         {
-            var sivm = new StarIndexViewModel(StarMapBLL.GetServerList());
+            var sivm = new StarIndexViewModel(StarMapBLL.GetServerList())
+            {
+                SearchViewModel = vm
+            };
+            sivm.SearchViewModel.Servers = sivm.Servers;
             HttpContext.Session.SetInt32(SessionServerSelection, vm.ServerId); //Remember option
             if (ModelState.IsValid)
             {
