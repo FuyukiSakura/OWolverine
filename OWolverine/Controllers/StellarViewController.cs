@@ -191,6 +191,11 @@ namespace OWolverine.Controllers
                 SetScore(scoreBoard, scoreData.Id, scoreData.Ships, "ShipNumber", militaryScoreData.LastUpdate);
             }
             //Calculate Ship score
+            foreach(var score in scoreBoard.Scores)
+            {
+                var shipScore = score.Total - score.Economy - score.Research;
+                SetScore(scoreBoard, score.Id, shipScore, "Ship", militaryScoreData.LastUpdate);
+            }
             await StarMapBLL.UpdateScoreBoardAsync(scoreBoard);
             return RedirectToAction("Index");
         }
