@@ -210,7 +210,7 @@ namespace OWolverine.Models.Ogame
                 var history = _player.Score.UpdateHistory.FirstOrDefault(h => h.Type == ScoreType.Total.ToString());
                 if (history == null)
                 {
-                    return _player.Score.LastUpdate.ToString("g");
+                    return "N/A";
                 }
                 var diff = _player.Score.LastUpdate - history.UpdatedAt;
                 return String.Format("{0} {1}",
