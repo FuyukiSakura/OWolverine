@@ -156,9 +156,9 @@ namespace OWolverine.Controllers
         public async Task<IActionResult> UpdateScoreBoard(int id)
         {
             var totalScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Total);
-            var econScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Total);
+            var econScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Economy);
             var researchScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Research);
-            var militaryScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Research);
+            var militaryScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Military);
             var lastUpdate = DateTimeHelper.GetLatestDate(new List<DateTime>
             {
                 totalScoreData.LastUpdate,
