@@ -52,7 +52,10 @@ namespace OWolverine.Services.Ogame
         {
             var serializer = new XmlSerializer(typeof(PlayerList));
             var playerList = ((PlayerList)serializer.Deserialize(RequestAPI(serverId, playerAPI)));
-            playerList.Players.ForEach(p => p.CreatedAt = playerList.LastUpdate);
+            playerList.Players.ForEach(p => {
+                p.CreatedAt = playerList.LastUpdate;
+                p.LastUpdate = playerList.LastUpdate;
+            });
             return playerList;
         }
 

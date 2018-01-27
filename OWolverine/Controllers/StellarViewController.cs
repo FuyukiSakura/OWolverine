@@ -67,12 +67,55 @@ namespace OWolverine.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Search(StarSearchViewModel vm)
         {
-            var sivm = new StarIndexViewModel(StarMapBLL.GetServerList());
+            var sivm = new StarIndexViewModel(StarMapBLL.GetServerList())
+            {
+                SearchViewModel = vm
+            };
+            sivm.SearchViewModel.Servers = sivm.Servers;
             HttpContext.Session.SetInt32(SessionServerSelection, vm.ServerId); //Remember option
             if (ModelState.IsValid)
             {
                 sivm.IsSearch = true;
-                sivm.AssignPlayers(StarMapBLL.SearchPlayerByName(vm.PlayerName, vm.ServerId));
+
+                //Search player
+                var status = "";
+                if (vm.PlayerStatus.IsBanned) status += "b";
+                if (vm.PlayerStatus.IsFlee) status += "o";
+                if (vm.PlayerStatus.IsInactive && !vm.PlayerStatus.IsLeft) status += "i";
+                if (vm.PlayerStatus.IsLeft) status += "I";
+
+                List<Player> players = new List<Player>();
+                if (!vm.Coords.IsEmpty)
+                {
+                    //Search by coordinate
+                    var planets = StarMapBLL.SearchPlanetsByCoordinate(vm.Coords, vm.ServerId, vm.Range);
+                    foreach(var planet in planets)
+                    {
+                        var player = players.FirstOrDefault(p => p.Id == planet.OwnerId);
+                        if (player != null)
+                        {
+                            //Player exists in list
+                            planet.Owner = player; //Assign to planet
+                            continue;
+                        }
+
+                        //Find all owners in range
+                        var owner = StarMapBLL.SearchPlayerById(vm.ServerId, planet.OwnerId);
+                        if (owner != null)
+                        {
+                            //Owner found in DB and is new
+                            players.Add(StarMapBLL.SearchPlayerById(vm.ServerId, planet.OwnerId));
+                            planet.Owner = owner;
+                        }
+                    }
+                    sivm.Planets = planets;
+                }
+                else
+                {
+                    //Name only search
+                    players.AddRange(StarMapBLL.SearchPlayerByName(vm.PlayerName ?? "", vm.ServerId, status));
+                }
+                sivm.AssignPlayers(players);
             }
             return View("Index", sivm);
         }

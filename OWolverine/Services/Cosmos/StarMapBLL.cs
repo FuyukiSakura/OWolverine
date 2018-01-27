@@ -83,6 +83,36 @@ namespace OWolverine.Services.Cosmos
                 $"c.LastUpdate FROM c WHERE SUBSTRING(c.id, 0, {ServerPrefix.Length}) = '{ServerPrefix}'").ToArray();
         }
 
+        // ##### Planets
+        /// <summary>
+        /// Search planet by coordinate given range
+        /// </summary>
+        /// <param name="coords"></param>
+        /// <param name="serverId"></param>
+        /// <param name="range"></param>
+        /// <returns></returns>
+        public static List<Planet> SearchPlanetsByCoordinate(Coordinate coords, int serverId, int range)
+        {
+            var queryString = $"SELECT VALUE planet FROM c JOIN p IN c.Players JOIN planet IN p.Planets JOIN planet.Coords crd WHERE c.id = '{GetServerId(serverId)}' ";
+            if (coords.Galaxy != 0)
+            {
+                queryString += $"AND crd.Galaxy = {coords.Galaxy} ";
+            }
+            if (coords.System != 0)
+            {
+                var minSys = coords.System - range;
+                var maxSys = coords.System + range;
+                queryString += $"AND (crd.System BETWEEN {minSys} AND {maxSys}) ";
+            }
+            if (coords.Location != 0)
+            {
+                queryString += $"AND crd.Location = {coords.Location}";
+            }
+            return _client.CreateDocumentQuery<Planet>(
+                UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName),
+                queryString).ToList();
+        }
+
         // ##### Players
         /// <summary>
         /// Search player by given name and server
@@ -93,27 +123,33 @@ namespace OWolverine.Services.Cosmos
         /// <param name="caseSensitive"></param>
         /// <param name="strict"></param>
         /// <returns></returns>
-        public static List<Player> SearchPlayerByName(string name, int serverId = -1, bool caseSensitive = false, bool strict = false)
+        public static List<Player> SearchPlayerByName(string name, int serverId = -1, string status = "", bool caseSensitive = false, bool strict = false)
         {
             var query = _client.CreateDocumentQuery<Universe>(
                 UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName))
                 .Where(u => serverId == -1 ? u.Id.Contains(ServerPrefix) : u.Id == GetServerId(serverId))
                 .SelectMany(u => u.Players);
 
-            List<Player> players;
             if (strict)
             {
-                players = query.Where(p => p.Name == name).ToList();
+                query = query.Where(p => p.Name == name);
             }
             else if (caseSensitive)
             {
-                players = query.Where(p => p.Name.Contains(name)).ToList();
+                query = query.Where(p => p.Name.Contains(name));
             }
             else
             {
-                players = query.Where(p => p.Name.ToLower().Contains(name.ToLower())).ToList();
+                query = query.Where(p => p.Name.ToLower().Contains(name.ToLower()));
+            }
+            
+            foreach(var c in status)
+            {
+                //Mark all status
+                query = query.Where(p => p.Status.Contains(c));
             }
 
+            var players = query.ToList();
             var scoreDocumnet = GetScoreByIds(serverId, players.Select(p => p.Id).ToArray());
             foreach (var player in players)
             {
@@ -128,6 +164,22 @@ namespace OWolverine.Services.Cosmos
                 }
             }
             return players;
+        }
+
+        /// <summary>
+        /// Search all players that owns a planet of the given ID
+        /// </summary>
+        /// <param name="serverId"></param>
+        /// <param name="planetIds"></param>
+        /// <returns></returns>
+        public static Player SearchPlayerById(int serverId, int playerId)
+        {
+            return _client.CreateDocumentQuery<Universe>(
+                UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName))
+                .Where(u => serverId == -1 ? u.Id.Contains(ServerPrefix) : u.Id == GetServerId(serverId))
+                .SelectMany(u => u.Players)
+                .Where(p => p.Id == playerId)
+                .ToArray()[0];
         }
 
         // ##### Scores
