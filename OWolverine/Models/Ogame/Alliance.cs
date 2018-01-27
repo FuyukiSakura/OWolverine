@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CSharpUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OWolverine.Models.Database;
 using System;
@@ -17,9 +18,10 @@ namespace OWolverine.Models.Ogame
         [XmlElement("alliance")]
         public List<Alliance> Alliances { get; set; }
         [XmlAttribute("timestamp")]
-        public double LastUpdate { get; set; }
+        public double Timestamp { get; set; }
+        [XmlIgnore]
+        public DateTime LastUpdate => DateTimeHelper.UnixTimeStampToDateTime(Timestamp);
     }
-
 
     public class Alliance : IUpdatable
     {
@@ -32,30 +34,11 @@ namespace OWolverine.Models.Ogame
         public string Tag { get; set; }
         [XmlAttribute("founder")]
         [NotMapped]
-        public int _founderId { get; set; }
-        public int? FounderId {
-            get
-            {
-                if (_founderId == -1)
-                {
-                    return null;
-                }
-                return _founderId;
-            }
-            set
-            {
-                _founderId = value == null ? -1 : (int)value;
-            }
-        }
-        [XmlIgnore]
-        public Player Founder { get; set; }
+        public int FounderId { get; set; }
         [XmlElement("player")]
-        public List<Player> Members { get; set; } = new List<Player>();
+        public List<PlayerId> Members { get; set; } = new List<PlayerId>();
         [XmlAttribute("open")]
         public bool IsOpen { get; set; }
-
-        public int ServerId { get; set; }
-        public Universe Server { get; set; }
 
         /// <summary>
         /// Update alliance with another alliance object
@@ -63,32 +46,16 @@ namespace OWolverine.Models.Ogame
         /// <param name="obj"></param>
         public void Update(IUpdatable obj)
         {
-            if(obj is Alliance alliance)
+            if (obj is Alliance alliance)
             {
-                if(FounderId != alliance.FounderId) FounderId = alliance.FounderId;
-                if(Name != alliance.Name) Name = alliance.Name;
-                if(Tag != alliance.Tag) Tag = alliance.Tag;
+                if (FounderId != alliance.FounderId) FounderId = alliance.FounderId;
+                if (Name != alliance.Name) Name = alliance.Name;
+                if (Tag != alliance.Tag) Tag = alliance.Tag;
                 //Remove members that have left
                 Members.RemoveAll(e => !alliance.Members.Any(a => a.Id == e.Id));
                 //Add new members
                 Members.AddRange(alliance.Members.Where(a => !Members.Any(e => e.Id == a.Id)));
             }
-        }
-    }
-
-    public class AllianceConfiguration : IEntityTypeConfiguration<Alliance>
-    {
-        public void Configure(EntityTypeBuilder<Alliance> builder)
-        {
-            builder.ToTable("Alliance", "og");
-            builder.HasAlternateKey(e => new { e.AllianceId, e.ServerId });
-            builder.HasOne(e => e.Server)
-                .WithMany(u => u.Alliances)
-                .HasForeignKey(e => e.ServerId);
-            builder.HasOne(e => e.Founder)
-                .WithOne()
-                .HasForeignKey<Alliance>(e => e.FounderId)
-                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

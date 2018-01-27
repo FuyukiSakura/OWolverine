@@ -21,7 +21,7 @@ namespace CSharpUtilities
             return dtDateTime;
         }
 
-        public static DateTime? GetLatestDate(List<DateTime> dates)
+        public static DateTime GetLatestDate(List<DateTime> dates)
         {
             DateTime max = DateTime.MinValue; // Start with the lowest value possible...
             foreach (DateTime date in dates)
@@ -29,7 +29,6 @@ namespace CSharpUtilities
                 if (DateTime.Compare(date, max) == 1)
                     max = date;
             }
-            if (max == DateTime.MinValue) return null;
             return max;
         }
     }

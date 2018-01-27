@@ -6,7 +6,7 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="ServerId"></label>
-                <select asp-for="ServerId" asp-items="@(new SelectList(Model.Servers, "Id", "Name"))" class="form-control"></select>
+                <select asp-for="ServerId" asp-items="@(new SelectList(Model.Servers, "ServerId", "Name"))" class="form-control"></select>
                 <span asp-validation-for="ServerId" class="text-danger"></span>
             </div>
             <div class="form-group">

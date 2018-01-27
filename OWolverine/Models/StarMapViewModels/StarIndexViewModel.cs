@@ -17,7 +17,7 @@ namespace OWolverine.Models.StarMapViewModels
         //Display Elements
         public List<PlayerViewModel> Players { get; set; } = new List<PlayerViewModel>();
         public List<Planet> Planets { get; set; } = new List<Planet>();
-        public List<UniverseViewModel> Servers { get; set; } = new List<UniverseViewModel>();
+        public List<Universe> Servers { get; set; } = new List<Universe>();
         public bool IsSearch { get; set; }
         public StarIndexViewModel(Universe[] universe)
         {
@@ -26,20 +26,7 @@ namespace OWolverine.Models.StarMapViewModels
             {
                 Servers = universe
             };
-
-            foreach (var u in universe)
-            {
-                //Get a random player from server
-                var tryResult = u.Players.Where(e => e.IsActive).OrderBy(r => Guid.NewGuid()).Take(1).ToArray();
-                var playerName = "";
-                if (tryResult.Any())
-                {
-                    playerName = tryResult[0].Name;
-                }
-
-                //Cast universe data to VM object
-                Servers.Add(new UniverseViewModel(u, playerName));
-            }
+            Servers = universe.ToList();
         }
 
         /// <summary>

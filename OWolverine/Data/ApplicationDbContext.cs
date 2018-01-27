@@ -16,22 +16,9 @@ namespace OWolverine.Data
         {
         }
 
-        //Datasets
-        public DbSet<Universe> Universes { get; set; }
-        public DbSet<Player> Players { get; set; }
-        public DbSet<Alliance> Alliances { get; set; }
-        public DbSet<Planet> Planets { get; set; }
-
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.Entity<Universe>().ToTable("Universe", "og");
-            builder.ApplyConfiguration(new PlayerConfiguration());
-            builder.ApplyConfiguration(new AllianceConfiguration());
-            builder.ApplyConfiguration(new PlanetConfiguration());
-            builder.Entity<Moon>().ToTable("Moon", "og");
-            builder.ApplyConfiguration(new ScoreConfiguration());
-            builder.Entity<ScoreHistory>().ToTable("ScoreHistory", "og");
         }
     }
 }

@@ -5,18 +5,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using OWolverine.Models;
-using System.Net.Http;
-using System.Xml.Linq;
-using OWolverine.Models.Utility;
 using OWolverine.Models.Ogame;
-using OgameApiBLL;
 using Microsoft.AspNetCore.Identity;
 using OWolverine.Data;
-using Microsoft.EntityFrameworkCore;
 using OWolverine.Services.Ogame;
 using CSharpUtilities;
 using OWolverine.Models.StarMapViewModels;
 using Microsoft.AspNetCore.Http;
+using OWolverine.Services.Cosmos;
 
 namespace OWolverine.Controllers
 {
@@ -53,17 +49,12 @@ namespace OWolverine.Controllers
         /// Get server list and random target on Index
         /// </summary>
         /// <returns></returns>
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var vm = new StarIndexViewModel(await _context.Universes
-                .Include(u => u.Players)
-                .Include(u => u.Planets)
-                    .ThenInclude(p => p.Moon)
-                .ToArrayAsync());
-            var lastSelection = HttpContext.Session.GetInt32(SessionServerSelection);
-            if (lastSelection != null)
-            {
-                vm.SearchViewModel.ServerId = (int)lastSelection;
+            var vm = new StarIndexViewModel(StarMapBLL.GetServerList());
+            var userServerPreference = HttpContext.Session.GetInt32(SessionServerSelection);
+            if (userServerPreference != null) {
+                vm.SearchViewModel.ServerId = (int)userServerPreference;
             }
             return View(vm);
         }
@@ -74,158 +65,87 @@ namespace OWolverine.Controllers
         /// <param name="vm"></param>
         /// <returns></returns>
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Search(StarSearchViewModel vm)
+        public IActionResult Search(StarSearchViewModel vm)
         {
-            var universeList = _context.Universes
-                .Include(u => u.Players)
-                .AsNoTracking();
-            var sivm = new StarIndexViewModel(await universeList.ToArrayAsync());
-            //Save server selection
-            HttpContext.Session.SetInt32(SessionServerSelection, vm.ServerId);
-
-            //Start searching
+            var sivm = new StarIndexViewModel(StarMapBLL.GetServerList());
+            HttpContext.Session.SetInt32(SessionServerSelection, vm.ServerId); //Remember option
             if (ModelState.IsValid)
             {
-                //Clean up
-                vm.PlayerName = vm.PlayerName ?? ""; //Prevent empty name
+                sivm.IsSearch = true;
+                sivm.AssignPlayers(StarMapBLL.SearchPlayerByName(vm.PlayerName, vm.ServerId));
+            }
+            return View("Index", sivm);
+        }
 
-                //Return info from request
-                sivm.SearchViewModel.PlayerName = vm.PlayerName;
-                sivm.SearchViewModel.ServerId = vm.ServerId;
-                sivm.SearchViewModel.Coords = vm.Coords;
+        /// <summary>
+        /// Update the server list
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> UpdateServerList()
+        {
+            var servers = OgameApi.GetAllUniverses();
+            foreach (var server in servers)
+            {
+                await StarMapBLL.CreateUniverseIfNotExistsAsync(server);
+            }
+            return RedirectToAction("Index");
+        }
 
-                var universe = _context.Universes
-                    .Include(u => u.Players)
-                        .ThenInclude(player => player.Alliance)
-                    .Include(u => u.Players)
-                        .ThenInclude(player => player.Planets)
-                        .ThenInclude(planet => planet.Moon)
-                    .Include(u => u.Players)
-                        .ThenInclude(player => player.Score)
-                            .ThenInclude(s => s.UpdateHistory)
-                    .Include(u => u.Planets)
-                    .AsNoTracking()
-                    .First(u => u.Id == vm.ServerId);
-                /* if ((DateTime.Now - universe.LastUpdate).Days >= 1)
+        /// <summary>
+        /// Refresh universe data
+        /// </summary>
+        /// <param name="id"></param>
+        public async Task<IActionResult> UpdateUniverse(int id)
+        {
+            var playerList = OgameApi.GetAllPlayers(id);
+            var allianceList = OgameApi.GetAllAlliances(id);
+            var planetList = OgameApi.GetAllPlanets(id);
+
+            var universe = await StarMapBLL.GetServer(id);
+            if (universe == null) return NotFound(); //Server not found
+
+            //Load Alliance
+            universe.Alliances = allianceList.Alliances;
+            universe.AllianceLastUpdate = allianceList.LastUpdate;
+
+            //Load Players
+            universe.Players = playerList.Players;
+            universe.PlayersLastUpdate = playerList.LastUpdate;
+
+            //Load Planets
+            foreach(var planet in planetList.Planets)
+            {
+                var owner = universe.Players.FirstOrDefault(p => p.Id == planet.OwnerId);
+                if (owner == null) continue; //Ignore if owner not in player list
+
+                var playerPlanet = owner.Planets.FirstOrDefault(pn => pn.Id == planet.Id);
+                if(playerPlanet == null)
                 {
-                    //Update universe if older than 1 day
-                    await UpdateUniverse(vm.ServerId);
-                } */
-
-                var players = new List<Player>();
-                var planets = new List<Planet>();
-                if (vm.Coords.IsAddress)
-                {
-                    //Targetted Search
-                    var targetPlanet = universe.Planets.FirstOrDefault(e => e.Coords.IsEqual(vm.Coords));
-                    if (targetPlanet != null)
-                    {
-                        players.Add(targetPlanet.Owner);
-                        planets = new List<Planet>()
-                        {
-                            targetPlanet
-                        };
-
-                        //Search all planets owned by alliance member in range
-                        planets.AddRange(universe.Planets
-                            .Where(e => e.Owner.Alliance == targetPlanet.Owner.Alliance && 
-                                e.Coords.Galaxy == targetPlanet.Coords.Galaxy && 
-                                e.Coords.System >= (targetPlanet.Coords.System - vm.Range) &&
-                                e.Coords.System <= (targetPlanet.Coords.System + vm.Range)
-                            )
-                        );
-                        
-                        foreach(var planet in planets)
-                        {
-                            //Add found players to list
-                            if (!players.Contains(planet.Owner)) { 
-                                players.Add(planet.Owner);
-                            }
-                        }
-                    }
+                    //Add if not exist
+                    owner.Planets.Add(planet);
                 }
                 else
                 {
-                    //Normal Search
-                    players = universe
-                        .Players
-                        .Where(e => e.Name.Contains(vm.PlayerName, StringComparison.OrdinalIgnoreCase)).ToList();
-
-                    // ----- Status filter
-                    if (vm.PlayerStatus.IsBanned)
-                    {
-                        players.RemoveAll(p => !p.IsBanned);
-                    }
-                    if (vm.PlayerStatus.IsFlee)
-                    {
-                        players.RemoveAll(p => !p.IsFlee);
-                    }
-                    if (vm.PlayerStatus.IsInactive)
-                    {
-                        players.RemoveAll(p => !p.IsInactive);
-                    }
-                    if (vm.PlayerStatus.IsLeft)
-                    {
-                        players.RemoveAll(p => !p.IsLeft);
-                    }
-
-                    // ----- Planet search
-                    if (!vm.Coords.IsEmpty)
-                    {
-                        var requestedCoords = vm.Coords;
-                        planets = universe.Planets.Where(e =>
-                            (requestedCoords.Galaxy == 0 || e.Coords.Galaxy == requestedCoords.Galaxy) &&
-                            (requestedCoords.System == 0 ||
-                                e.Coords.System == requestedCoords.System ||
-                                e.Coords.System >= (requestedCoords.System - vm.Range) &&
-                                e.Coords.System <= (requestedCoords.System + vm.Range)
-                                ) &&
-                            (requestedCoords.Location == 0 || e.Coords.Location == requestedCoords.Location)
-                        ).OrderBy(e => e.Coords.Galaxy)
-                        .OrderBy(e => e.Coords.System)
-                        .OrderBy(e => e.Coords.Location).ToList();
-
-                        //Remove all planets that are not owned by a player
-                        planets.RemoveAll(e => !players.Contains(e.Owner));
-
-                        //Remove all players that does not own a planet in the range
-                        players.RemoveAll(e => !e.Planets.Where(p => planets.Contains(p)).Any());
-                    }
+                    //Update if found
+                    playerPlanet.Update(planet);
                 }
-
-                //Load Player score
-                foreach(var player in players)
-                {
-                    if(player.Score == null)
-                    {
-                        //Backward compatability
-                        player.Score = new Score();
-                        continue;
-                    }
-
-                    player.Score.UpdateHistory = player.Score.UpdateHistory
-                        .GroupBy(h => h.Type)
-                        .Select(g => g.OrderByDescending(h => h.UpdatedAt).First())
-                        .ToList();
-
-                    var totalFirst = player.Score.UpdateHistory.FirstOrDefault(h => h.Type == ScoreType.Total.ToString());
-                    if (totalFirst != null && totalFirst.UpdatedAt == player.Score.LastUpdate)
-                    {
-                        var totalSecord = player.Score.UpdateHistory
-                            .Where(h => h.Type == ScoreType.Total.ToString())
-                            .OrderByDescending(h => h.UpdatedAt)
-                            .Take(2).ToArray();
-                        if (totalSecord.Length >= 2)
-                        {
-                            player.Score.UpdateHistory.Add(totalSecord[1]);
-                        }
-                    }
-                }
-                sivm.Planets = planets;
-                sivm.AssignPlayers(players);
-                sivm.IsSearch = true;
             }
-            return View("Index", sivm);
+            universe.PlanetsLastUpdate = planetList.LastUpdate;
+
+            //Update statistic
+            universe.Statistic.PlayerCount = universe.Players.Count;
+            universe.Statistic.ActivePlayerCount = universe.Players.Where(p => p.IsActive).Count();
+            universe.Statistic.PlanetCount = planetList.Planets.Count;
+            universe.Statistic.MoonCount = planetList.Planets.Where(p => p.Moon != null).Count();
+            universe.Statistic.LastUpdate = DateTimeHelper.GetLatestDate(new List<DateTime>
+            {
+                planetList.LastUpdate,
+                allianceList.LastUpdate,
+                planetList.LastUpdate
+            });
+            universe.Statistic.MapUpdateDay = planetList.LastUpdate.ToString("ddd");
+            await StarMapBLL.UpdateServerAsync(universe);
+            return RedirectToAction("Index");
         }
 
         /// <summary>
@@ -235,286 +155,90 @@ namespace OWolverine.Controllers
         /// <returns></returns>
         public async Task<IActionResult> UpdateScoreBoard(int id)
         {
-            var universe = _context.Universes
-                .Include(e => e.Players)
-                    .ThenInclude(p => p.Score)
-                        .ThenInclude(s => s.UpdateHistory)
-                .FirstOrDefault(e => e.Id == id);
             var totalScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Total);
-            var militaryScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Military);
-            var economyScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Economy);
+            var econScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Economy);
             var researchScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Research);
-            foreach (var player in universe.Players)
+            var militaryScoreData = OgameApi.GetHighScore(id, ScoreCategory.Player, ScoreType.Military);
+            var lastUpdate = DateTimeHelper.GetLatestDate(new List<DateTime>
             {
-                if (player.Score == null)
-                {
-                    //Backward compatability
-                    player.Score = new Score();
-                    _context.Add(player.Score);
-                }
-
-                if (player.Score.LastUpdate == totalScoreData.LastUpdate)
-                {
-                    //Ignore entry if last update time match
-                    continue;
-                }
-                player.Score.LastUpdate = totalScoreData.LastUpdate;
-
-                // Score: Total
-                var totalScore = totalScoreData.Scores.FirstOrDefault(s => s.Id == player.PlayerId);
-                if (totalScore != null && totalScore.Value != player.Score.Total)
-                {
-                    //Update only if found and different
-                    player.Score.UpdateHistory.Add(GenerateScoreHistory(ScoreType.Total,
-                        player.Score.Total,
-                        totalScore.Value,
-                        totalScoreData.LastUpdate));
-                    player.Score.Total = totalScore.Value;
-                }
-
-                // Score: Economy
-                var econScore = economyScoreData.Scores.FirstOrDefault(s => s.Id == player.PlayerId);
-                if (econScore != null && econScore.Value != player.Score.Economy)
-                {
-                    //Update only if found and different
-                    player.Score.UpdateHistory.Add(GenerateScoreHistory(ScoreType.Economy,
-                        player.Score.Economy,
-                        econScore.Value,
-                        economyScoreData.LastUpdate));
-                    player.Score.Economy = econScore.Value;
-                }
-
-                // Score: Research
-                var researchScore = researchScoreData.Scores.FirstOrDefault(s => s.Id == player.PlayerId);
-                if (researchScore != null && researchScore.Value != player.Score.Research)
-                {
-                    //Update only if found and different
-                    player.Score.UpdateHistory.Add(GenerateScoreHistory(ScoreType.Research,
-                        player.Score.Research,
-                        researchScore.Value,
-                        researchScoreData.LastUpdate));
-                    player.Score.Research = researchScore.Value;
-                }
-
-                // Score: Military
-                var militaryScore = militaryScoreData.Scores.FirstOrDefault(s => s.Id == player.PlayerId);
-                if (militaryScore != null && militaryScore.Value != player.Score.Military)
-                {
-                    //Update only if found and different
-                    player.Score.UpdateHistory.Add(GenerateScoreHistory(ScoreType.Military,
-                        player.Score.Military,
-                        militaryScore.Value,
-                        militaryScoreData.LastUpdate));
-                    player.Score.Military = militaryScore.Value;
-                    player.Score.ShipNumber = militaryScore.Ships;
-                }
-
-                var shipScore = player.Score.Military - (player.Score.Economy + player.Score.Research + player.Score.Military - player.Score.Total);
-                if (shipScore != player.Score.Ship)
-                {
-                    player.Score.UpdateHistory.Add(new ScoreHistory
-                    {
-                        Type = "Ship",
-                        OldValue = player.Score.Ship,
-                        NewValue = shipScore,
-                        UpdatedAt = totalScoreData.LastUpdate
-                    });
-                    player.Score.Ship = shipScore;
-                }
-
-                if (player.LastUpdate < totalScoreData.LastUpdate)
-                {
-                    player.LastUpdate = totalScoreData.LastUpdate;
-                }
-                //Track changes
-                _context.Update(player);
-            }
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
-        }
-
-        /// <summary>
-        /// Generate Score History
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="oldValue"></param>
-        /// <param name="newValue"></param>
-        /// <param name="ApiTime"></param>
-        /// <returns></returns>
-        private ScoreHistory GenerateScoreHistory (ScoreType type, int oldValue, int newValue, DateTime ApiTime)
-        {
-            return new ScoreHistory
-            {
-                Type = type.ToString(),
-                OldValue = oldValue,
-                NewValue = newValue,
-                UpdatedAt = ApiTime
-            };
-        }
-
-        /// <summary>
-        /// Refresh universe data
-        /// </summary>
-        /// <param name="id"></param>
-        public async Task<IActionResult> UpdateUniverse(int id)
-        {
-            var universe = _context.Universes
-                .Include(u => u.Players)
-                .Include(u => u.Alliances)
-                    .ThenInclude(a => a.Members)
-                .Include(u => u.Planets)
-                    .ThenInclude(p => p.Moon)
-                .FirstOrDefault(u => u.Id == id);
-            if (universe == null) return NotFound();
-
-            //Load players into DB
-            var playersData = OgameApi.GetAllPlayers(id);
-            var playerList = playersData.Players;
-            if (playersData.LastUpdate != universe.PlayersLastUpdate)
-            {
-                //Only update if the API Date is different
-                var removeList = new List<Player>();
-                foreach(var player in universe.Players)
-                {
-                    var pNew = playerList.FirstOrDefault(p => p.PlayerId == player.PlayerId);
-                    if(pNew == null)
-                    {
-                        //Remove player if not found in API
-                        removeList.Add(player);
-                    }
-                    else
-                    {
-                        player.Update(pNew);
-                        playerList.Remove(pNew); //Remove from list after update
-                    }
-                }
-                _context.RemoveRange(removeList);
-                await _context.AddRangeAsync(playerList);
-                universe.PlayersLastUpdate = playersData.LastUpdate; //Update API Date
-                await _context.SaveChangesAsync();
-            }
-
-            //Load Alliance into DB
-            var allianceData = OgameApi.GetAllAlliances(id);
-            var allianceList = allianceData.Alliances;
-            var alliancesLastUpdate = DateTimeHelper.UnixTimeStampToDateTime(allianceData.LastUpdate);
-            if (alliancesLastUpdate != universe.AllianceLastUpdate)
-            {
-                //Only update if the API Date is different
-                var removeList = new List<Alliance>();
-                allianceList.ForEach(a =>
-                {
-                    var dbItem = universe.Alliances.FirstOrDefault(e => e.AllianceId == a.AllianceId);
-                    a.Founder = universe.Players.FirstOrDefault(p => p.PlayerId == a.FounderId);
-                    if (a.Founder == null)
-                    {
-                        //Unset founder ID if founder not found
-                        a.FounderId = null;
-                    }
-                    else
-                    {
-                        //Assign ID of player in DB
-                        a.FounderId = a.Founder.Id;
-                    }
-
-                    for (var i = 0; i < a.Members.Count; i++)
-                    {
-                        //Replace member placeholder with database object
-                        a.Members[i] = universe.Players.FirstOrDefault(p => p.PlayerId == a.Members[i].PlayerId);
-                    }
-                    a.Members.RemoveAll(m => m == null);
-
-                    if (dbItem != null)
-                    {
-                        a.Id = dbItem.Id;
-                        //Update the context
-                        dbItem.Update(a);
-                        removeList.Add(a);
-                    }
-                });
-                //Remove alliances no longer exists
-                universe.Alliances.RemoveAll(e => !allianceList.Any(a => a.Id == e.Id));
-                allianceList.RemoveAll(a => removeList.Contains(a));
-                await _context.AddRangeAsync(allianceList); //Add new alliances
-                universe.AllianceLastUpdate = alliancesLastUpdate; //Update API Date
-                await _context.SaveChangesAsync();
-            }
-
-            //Load Planet into DB
-            var planetData = OgameApi.GetAllPlanets(id);
-            var planetList = planetData.Planets;
-            var planetLastUpdate = DateTimeHelper.UnixTimeStampToDateTime(planetData.LastUpdate);
-            if (planetLastUpdate != universe.PlanetsLastUpdate)
-            {
-                //Only update if the API Date is different
-                //Update existing planets
-                var removeList = new List<Planet>();
-                planetList.ForEach(p =>
-                {
-                    //Assign real owner ID
-                    var owner = universe.Players.FirstOrDefault(e => e.PlayerId == p.OwnerId);
-                    if (owner == null) {
-                        //Player removed planet no longer exists
-                        removeList.Add(p);
-                    }
-                    else
-                    {
-                        p.OwnerId = owner.Id;
-                    }
-                });
-                planetList.RemoveAll(p => removeList.Contains(p));
-
-                removeList.Clear();
-                foreach (var planet in universe.Planets)
-                {
-                    var pNew = planetList.FirstOrDefault(p => p.PlanetId == planet.PlanetId);
-                    if (pNew == null)
-                    {
-                        //Remove if not exists in API
-                        removeList.Add(planet);
-                    }
-                    else
-                    {
-                        planet.Update(pNew);
-                        planetList.Remove(pNew); //Remove updated item
-                    }
-                }
-                //Remove planets no longer exists
-                _context.RemoveRange(removeList);
-                await _context.AddRangeAsync(planetList);
-                universe.PlanetsLastUpdate = planetLastUpdate;
-            }
-            universe.LastUpdate = DateTime.Now;
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        public JsonResult GetUser(string server,string playerName)
-        {
-            var player = OgameAPI.FindPlayer(server, playerName);
-            if(player == null)
-            {
-                return new JsonResult(new Response() { status = APIStatus.Fail, message = "玩家不存在" });
-            }
-
-            OgameAPI.FillPlayerData(player);            
-            return new JsonResult(new Response() {
-                status = APIStatus.Success,
-                message = "Returned with data",
-                data = new[] { player.Data }
+                totalScoreData.LastUpdate,
+                econScoreData.LastUpdate,
+                researchScoreData.LastUpdate,
+                militaryScoreData.LastUpdate
             });
+
+            var scoreBoard = await StarMapBLL.GetScoreBoardAsync(id, ScoreCategory.Player);
+            if (scoreBoard.LastUpdate == lastUpdate) return RedirectToAction("Index"); //Abort if Api not updated
+            // Update total
+            foreach (var scoreData in totalScoreData.Scores)
+            {
+                SetScore(scoreBoard, scoreData.Id, scoreData.Value, ScoreType.Total.ToString(), totalScoreData.LastUpdate);
+            }
+            // Update Economy
+            foreach (var scoreData in econScoreData.Scores)
+            {
+                SetScore(scoreBoard, scoreData.Id, scoreData.Value, ScoreType.Economy.ToString(), econScoreData.LastUpdate);
+            }
+            // Update Research
+            foreach (var scoreData in researchScoreData.Scores)
+            {
+                SetScore(scoreBoard, scoreData.Id, scoreData.Value, ScoreType.Research.ToString(), researchScoreData.LastUpdate);
+            }
+            // Update Military
+            foreach (var scoreData in militaryScoreData.Scores)
+            {
+                SetScore(scoreBoard, scoreData.Id, scoreData.Value, ScoreType.Military.ToString(), militaryScoreData.LastUpdate);
+                SetScore(scoreBoard, scoreData.Id, scoreData.Ships, "ShipNumber", militaryScoreData.LastUpdate);
+            }
+            //Calculate Ship score
+            foreach(var score in scoreBoard.Scores)
+            {
+                var shipScore = score.Total - score.Economy - score.Research;
+                SetScore(scoreBoard, score.Id, shipScore, "Ship", militaryScoreData.LastUpdate);
+            }
+            await StarMapBLL.UpdateScoreBoardAsync(scoreBoard);
+            return RedirectToAction("Index");
         }
 
-        [HttpGet]
-        public JsonResult GetServers()
+        private void SetScore(ScoreBoard scoreBoard, int playerId, int newValue, string type, DateTime lastUpdate)
         {
-            var httpClient = new HttpClient();
-            var result = httpClient.GetAsync("https://s101-tw.ogame.gameforge.com/api/universes.xml").Result;
-            var stream = result.Content.ReadAsStreamAsync().Result;
-            var itemXml = XElement.Load(stream);
-            var servers = itemXml.Elements("universe");
-            return new JsonResult(false);
+            var score = scoreBoard.Scores.FirstOrDefault(s => s.Id == playerId);
+            if (score == null)
+            {
+                //Create new score item if not exists
+                score = new Score()
+                {
+                    Id = playerId,
+                    UpdateHistory = new List<ScoreHistory>()
+                };
+                scoreBoard.Scores.Add(score);
+            }
+
+            //Update score
+            var typeInfo = score.GetType().GetProperty(type.ToString());
+            var value = (int)typeInfo.GetValue(score);
+            if (value != newValue)
+            {
+                //Add history
+                var updateHistory = new ScoreHistory()
+                {
+                    Type = type,
+                    OldValue = value,
+                    NewValue = newValue,
+                    UpdateInterval = lastUpdate - score.LastUpdate,
+                    UpdatedAt = lastUpdate
+                };
+                score.UpdateHistory.Add(updateHistory);
+
+                //Update score
+                typeInfo.SetValue(score, newValue);
+            }
+
+            //Update score update time
+            if(score.LastUpdate < lastUpdate)
+            {
+                score.LastUpdate = lastUpdate;
+            }
         }
 
         public IActionResult Error()

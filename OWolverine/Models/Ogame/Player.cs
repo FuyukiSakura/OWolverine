@@ -1,6 +1,7 @@
 ﻿using CSharpUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Newtonsoft.Json;
 using OWolverine.Models.Database;
 using System;
 using System.Collections.Generic;
@@ -23,15 +24,20 @@ namespace OWolverine.Models.Ogame
         public DateTime LastUpdate => DateTimeHelper.UnixTimeStampToDateTime(Timestamp);
     }
 
+    public class PlayerId
+    {
+        [XmlAttribute("id")]
+        public int Id { get; set; }
+    }
+
     public class Player : IUpdatable
     {
-        public int Id { get; set; }
         [XmlAttribute("id")]
-        public int PlayerId { get; set; }
+        public int Id { get; set; }
         [XmlAttribute("name")]
         public string Name { get; set; }
         [XmlAttribute("status")]
-        [NotMapped]
+        [JsonIgnore]
         public string Status {
             get
             {
@@ -56,24 +62,11 @@ namespace OWolverine.Models.Ogame
         }
 
         [XmlAttribute("alliance")]
-        [NotMapped]
-        private int _AllianceId { get; set; }
-        public int? AllianceId
-        {
-            get
-            {
-                if (_AllianceId == -1) {
-                    return null;
-                }
-                else
-                {
-                    return _AllianceId;
-                }
-            }
-            set => _AllianceId = value == null ? -1 : (int)value;
-        }
+        public int AllianceId { get; set; }
+        [JsonIgnore]
         public Alliance Alliance { get; set; }
-        public Score Score { get; set; }
+        [JsonIgnore]
+        public Score Score { get; set; } = new Score();
 
         //Status Property
         public bool IsAdmin { get; set; }
@@ -91,9 +84,7 @@ namespace OWolverine.Models.Ogame
             }
         }
 
-        public List<Planet> Planets { get; set; } = new List<Planet>();
-        public int ServerId { get;set; }
-        public Universe Server { get; set; }
+        public List<Planet> Planets { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime LastUpdate { get; set; }
 
@@ -125,7 +116,6 @@ namespace OWolverine.Models.Ogame
         public string Name => _player.Name;
         public Alliance Alliance => _player.Alliance;
         public List<Planet> Planets => _player.Planets;
-        public int ServerId => _player.ServerId;
         //Status
         public string StatusText => HasStatus ? $"(Status: {_player.Status})":"";
         public bool HasStatus => _player.Status != "";
@@ -176,21 +166,9 @@ namespace OWolverine.Models.Ogame
             get
             {
                 var historyTotal = _player.Score.UpdateHistory
-                    .Where(h => h.Type == ScoreType.Total.ToString())
-                    .OrderByDescending(h => h.UpdatedAt)
-                    .ToArray();
-                TimeSpan diff;
-                if (historyTotal.Length <= 0)
-                {
-                    diff = DateTime.UtcNow - _player.LastUpdate;
-                } else if (historyTotal.Length == 1)
-                {
-                    diff = _player.Score.LastUpdate - historyTotal[0].UpdatedAt;
-                }
-                else
-                {
-                    diff = historyTotal[0].UpdatedAt - historyTotal[1].UpdatedAt;
-                }
+                    .FirstOrDefault(h => h.Type == ScoreType.Total.ToString());
+                if (historyTotal == null) return "N/A"; //No history info
+                var diff = historyTotal.UpdateInterval;
                 return String.Format("{0} {1}",
                     diff.Days == 0 ? "" : String.Format("{0} Day{1}", diff.Days, diff.Days > 1 ? "s" : ""),
                     String.Format("{0} Hour{1}", diff.Hours, diff.Hours > 1 ? "s" : ""));
@@ -220,31 +198,24 @@ namespace OWolverine.Models.Ogame
                 return "Turtle";
             }
         }
-        public string LastUpdate => _player.LastUpdate.ToString("g");
+        public string LastAction {
+            get
+            {
+                var history = _player.Score.UpdateHistory.FirstOrDefault(h => h.Type == ScoreType.Total.ToString());
+                if (history == null)
+                {
+                    return _player.Score.LastUpdate.ToString("g");
+                }
+                var diff = _player.Score.LastUpdate - history.UpdatedAt;
+                return String.Format("{0} {1}",
+                    diff.Days == 0 ? "" : String.Format("{0} Day{1}", diff.Days, diff.Days > 1 ? "s" : ""),
+                    String.Format("{0} Hour{1}", diff.Hours, diff.Hours > 1 ? "s" : ""));
+            }
+        }
 
         public PlayerViewModel(Player player)
         {
             _player = player;
-        }
-    }
-
-    public class PlayerConfiguration : IEntityTypeConfiguration<Player>
-    {
-        public void Configure(EntityTypeBuilder<Player> builder)
-        {
-            builder.ToTable("Player", "og");
-            builder.HasAlternateKey(e => new { e.PlayerId, e.ServerId });
-            builder.HasOne(e => e.Server)
-                .WithMany(u => u.Players)
-                .HasForeignKey(e => e.ServerId);
-            builder.HasMany(e => e.Planets)
-                .WithOne(p => p.Owner)
-                .HasForeignKey(p => p.OwnerId);
-            builder.HasOne(e => e.Alliance)
-                .WithMany(a => a.Members)
-                .HasForeignKey(e => e.AllianceId)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

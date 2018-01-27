@@ -1,4 +1,5 @@
-﻿using OWolverine.Models.Ogame;
+﻿using CSharpUtilities;
+using OWolverine.Models.Ogame;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -36,7 +37,7 @@ namespace OWolverine.Services.Ogame
             foreach (var id in servers)
             {
                 var universe = (Universe)serializer.Deserialize(RequestAPI(id, serverDataAPI));
-                universe.LastUpdate = DateTime.Now;
+                universe.LastUpdate = DateTimeHelper.UnixTimeStampToDateTime(universe.Timestamp);
                 universeList.Add(universe);
             }
             return universeList.ToArray();
@@ -51,11 +52,7 @@ namespace OWolverine.Services.Ogame
         {
             var serializer = new XmlSerializer(typeof(PlayerList));
             var playerList = ((PlayerList)serializer.Deserialize(RequestAPI(serverId, playerAPI)));
-            playerList.Players.ForEach(p => {
-                p.AllianceId = null; //Unset alliance
-                p.ServerId = serverId; //Attach server
-                p.CreatedAt = playerList.LastUpdate;
-            });
+            playerList.Players.ForEach(p => p.CreatedAt = playerList.LastUpdate);
             return playerList;
         }
 
@@ -67,13 +64,7 @@ namespace OWolverine.Services.Ogame
         public static AllianceList GetAllAlliances(int serverId)
         {
             var serializer = new XmlSerializer(typeof(AllianceList));
-            var allianceList = ((AllianceList)serializer.Deserialize(RequestAPI(serverId, allianceAPI)));
-            allianceList.Alliances.ForEach(a =>
-            {
-                a.ServerId = serverId;
-                a.Members.ForEach(m => m.ServerId = serverId);
-            }); //Assign server id
-            return allianceList;
+            return ((AllianceList)serializer.Deserialize(RequestAPI(serverId, allianceAPI)));
         }
 
         /// <summary>
@@ -84,12 +75,7 @@ namespace OWolverine.Services.Ogame
         public static PlanetList GetAllPlanets(int serverId)
         {
             var serializer = new XmlSerializer(typeof(PlanetList));
-            var planetList = ((PlanetList)serializer.Deserialize(RequestAPI(serverId, universeAPI)));
-            planetList.Planets.ForEach(a =>
-            {
-                a.ServerId = serverId;
-            }); //Assign server id
-            return planetList;
+            return ((PlanetList)serializer.Deserialize(RequestAPI(serverId, universeAPI)));
         }
 
         /// <summary>
